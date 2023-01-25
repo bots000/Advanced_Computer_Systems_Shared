@@ -34,7 +34,7 @@ The program was run on the same two input files using a variable number of worke
 | .txt file (3.5 GB) | 1000 | 1:47 | Yes |
 | .mp4 file (3.5 GB) | 1000 | 4:54 | Yes |
 
-**64 KB Block Data**
+**32 KB Block Data**
 | File type | Number of worker threads | Runtime (seoncds) | Successful Compression (yes/no) |
 | --- | ----- | ----- | --- |
 | .txt file (3.5 GB) | 3 | : | Yes |
@@ -60,7 +60,7 @@ It can be observed that with minimal worker threads, the .txt compression took a
 
 As the number of worker threads increased to more substantial numbers, minimally 350, the time of creating and managing them was no longer greater than the benefit that the parallel programming provided.  However, if the number of worker threads became too large, the total runtime began to increase again.  This is seen with the 1000 worker threads example.  The peak number of worker threads, given this limited data set, was approximately 750 worker threads.  It is also worth noting that the optimal number differs based on the input file size, as the 9GB .mp4 file required less worker threads than the 3.5GB .txt file.
 
-In an effort to showcase that the optimal number of worker threads was directly affected by the size of the blocks being compressed (16KB), the same program was run using 64KB blocks instead.  It can be seen that using worker threads, this program ran much faster than its 16KB counterpart.  This is because the worker threads individually run longer (as it takes longer to compress more data), meaning that more time is saved when they are processed in parallel.  The optimal time for the .txt file dipped from approximately 1 minute to approximately ___ seconds (using only ___ worker threads), and the optimal time for the .mp4 file dipped from approximately 4 minutes to approximately ___ minute (using only ___ worker threads).
+In an effort to showcase that the optimal number of worker threads was directly affected by the size of the blocks being compressed (16KB), the same program was run using 32KB blocks instead.  It can be seen that using worker threads, this program ran much faster than its 16KB counterpart.  This is because the worker threads individually run longer (as it takes longer to compress more data), meaning that more time is saved when they are processed in parallel.  The optimal time for the .txt file dipped from approximately 1 minute to approximately ___ seconds (using only ___ worker threads), and the optimal time for the .mp4 file dipped from approximately 4 minutes to approximately ___ minute (using only ___ worker threads).
 
 # Conclusion
 
