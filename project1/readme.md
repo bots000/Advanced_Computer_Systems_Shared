@@ -18,46 +18,46 @@ The program was run on the same two input files using a variable number of worke
 | File type | Number of worker threads | Runtime (seoncds) | Successful Compression (yes/no) |
 | --- | ----- | ----- | --- |
 | .txt file (3.5 GB) | 25 | 1:03 | Yes |
-| .mp4 file (3.5 GB) | 25 | 4:59 | Yes |
+| .mp4 file (9 GB) | 25 | 4:59 | Yes |
 | .txt file (3.5 GB) | 50 | 1:59 | Yes |
-| .mp4 file (3.5 GB) | 50 | 5:32 | Yes |
+| .mp4 file (9 GB) | 50 | 5:32 | Yes |
 | .txt file (3.5 GB) | 100 | 2:01 | Yes |
-| .mp4 file (3.5 GB) | 100 | 5:22 | Yes |
+| .mp4 file (9 GB) | 100 | 5:22 | Yes |
 | .txt file (3.5 GB) | 200 | 2:06 | Yes |
-| .mp4 file (3.5 GB) | 200 | 5:12 | Yes |
+| .mp4 file (9 GB) | 200 | 5:12 | Yes |
 | .txt file (3.5 GB) | 350 | 1:55 | Yes |
-| .mp4 file (3.5 GB) | 350 | 4:58 | Yes |
+| .mp4 file (9 GB) | 350 | 4:58 | Yes |
 | .txt file (3.5 GB) | 500 | 1:35 | Yes |
-| .mp4 file (3.5 GB) | 500 | 4:04 | Yes |
+| .mp4 file (9 GB) | 500 | 4:04 | Yes |
 | .txt file (3.5 GB) | 750 | 1:03 | Yes |
-| .mp4 file (3.5 GB) | 750 | 4:09 | Yes |
+| .mp4 file (9 GB) | 750 | 4:09 | Yes |
 | .txt file (3.5 GB) | 1000 | 1:47 | Yes |
-| .mp4 file (3.5 GB) | 1000 | 4:54 | Yes |
+| .mp4 file (9 GB) | 1000 | 4:54 | Yes |
 
 
 **32 KB Block Data**
 | File type | Number of worker threads | Runtime (seoncds) | Successful Compression (yes/no) |
 | --- | ----- | ----- | --- |
 | .txt file (3.5 GB) | 3 | 0:35 | Yes |
-| .mp4 file (3.5 GB) | 3 | 2:05 | Yes |
+| .mp4 file (9 GB) | 3 | 2:05 | Yes |
 | .txt file (3.5 GB) | 10 | 0:37 | Yes |
-| .mp4 file (3.5 GB) | 10 | 2:15 | Yes |
+| .mp4 file (9 GB) | 10 | 2:15 | Yes |
 | .txt file (3.5 GB) | 25 | 0:55 | Yes |
-| .mp4 file (3.5 GB) | 25| 2:23 | Yes |
+| .mp4 file (9 GB) | 25| 2:23 | Yes |
 | .txt file (3.5 GB) | 50 | 0:45 | Yes |
-| .mp4 file (3.5 GB) | 50 | 2:18 | Yes |
+| .mp4 file (9 GB) | 50 | 2:18 | Yes |
 | .txt file (3.5 GB) | 100 | 0:45 | Yes |
-| .mp4 file (3.5 GB) | 100 | 2:18 | Yes |
+| .mp4 file (9 GB) | 100 | 2:18 | Yes |
 | .txt file (3.5 GB) | 200 | 0:48 | Yes |
-| .mp4 file (3.5 GB) | 200 | 2:17 | Yes |
+| .mp4 file (9 GB) | 200 | 2:17 | Yes |
 | .txt file (3.5 GB) | 300 | 0:55 | Yes |
-| .mp4 file (3.5 GB) | 300 | 2:19 | Yes |
+| .mp4 file (9 GB) | 300 | 2:19 | Yes |
 | .txt file (3.5 GB) | 450 | 0:53 | Yes |
-| .mp4 file (3.5 GB) | 450 | 2:17 | Yes |
+| .mp4 file (9 GB) | 450 | 2:17 | Yes |
 | .txt file (3.5 GB) | 600 | 0:48 | Yes |
-| .mp4 file (3.5 GB) | 600 | 2:22 | Yes |
+| .mp4 file (9 GB) | 600 | 2:22 | Yes |
 | .txt file (3.5 GB) | 750 | 0:44 | Yes |
-| .mp4 file (3.5 GB) | 750 | 2:20 | Yes |
+| .mp4 file (9 GB) | 750 | 2:20 | Yes |
 
 # Analysis
 
