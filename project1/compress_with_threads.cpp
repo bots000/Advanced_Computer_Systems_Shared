@@ -8,7 +8,7 @@
 #define BSIZE 16384
 using namespace std;
 
-// There needs to be some function called by the thread creation that will run some compression
+// Create structs that are used to pass data between main threads and worker threads
 
 struct datPack{    
     void* fBuff;
@@ -22,34 +22,40 @@ struct outPack{
     size_t cSize;
 };
 
+// the function that is called for each worker thread
 void* compress_data(void* dIn){
+
+    // convert input back to relevant data types
     datPack* dat = (datPack*) dIn;
+
+    // get the size of the data to be compressed
     size_t cBuffSize = ZSTD_compressBound((*dat).len);
     
-    
+    // allocate memory
     void* cBuff = malloc_orDie(cBuffSize);
     
     (*dat).cBuff = cBuff;
     
+    // compress data and store it in cBuff
     size_t cSize = ZSTD_compress(cBuff, cBuffSize, (*dat).fBuff, (*dat).len, 1);
     free(((*dat).fBuff));
     
     CHECK_ZSTD(cSize);
     (*dat).cSize = cSize;
+
+    // return compressed data pointer and size of this data
     pthread_exit((void*) dat);
 }
 
 int main(int argc, char *argv[]) {
     
-    // declare variables
+    // read in input
     int num_threads = atoi(argv[1]);
     char* input_file = argv[2];
     char* output_file = argv[3];
     num_threads = num_threads-1;
 
-    //string input_file = "ACS_P1_source_file";
-    //string output_file = "ACS_P1_compressed_file";
-
+    // variable initializations
     pthread_t thread_array[num_threads];
     datPack datArr[num_threads];
  
@@ -76,32 +82,34 @@ int main(int argc, char *argv[]) {
     }
 
     end_num = ceil(((double) file_size)/BSIZE);
+
+    // loop through the entire streaming of the input file
     for (counter = 0; counter < end_num + num_threads; counter++){
 
+        // determine the size of data to be read, deftaul to BSIZE
         if (counter + num_threads == end_num){ len = file_size % BSIZE;
         } else{ len = BSIZE;}
 
+        // get the corresponding index in the thread array -- the array is indexed by getting the oldest entry index
         index = counter % num_threads;
 
         if (counter >= num_threads){//unpack threads
-            //set new tempPack 
-            //tempPack = datArr[index];
-            //join due thread
+            
+            // get the value of thread in current index
             ret = pthread_join(thread_array[index], (void**)&dummyPack);
             char* ret_join2 = (char*) (*dummyPack).cBuff;
-            //cout << (*tempPack).cSize << endl;
-            //cout << (*dummyPack).cSize << endl;
+            
             // write out these compressed contents to the output file
             outfile.write((char*)(*dummyPack).cBuff, (*dummyPack).cSize);
             free(((*dummyPack).cBuff));
-            //free((*dOut).cBuff);
+            
         }
 
         if (counter <= end_num){ //make threads when not at end
             buffer = new char [len];
             //set new tempPack and free past fBuff
             tempPack = &(datArr[index]);
-            //free((*tempPack).fBuff);
+            
             //package data into tempPack
             (*tempPack).fBuff = buffer;
             (*tempPack).len = len;
@@ -112,8 +120,6 @@ int main(int argc, char *argv[]) {
             ret = pthread_create(&temp_thread, NULL, compress_data, tempPack);
             thread_array[index] = temp_thread;
         }
-        
-
     }
     return 0;
 }
