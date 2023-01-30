@@ -14,6 +14,8 @@ If automated results want to be generated for variable number of threads, *test_
 
 The program was run on the same two input files using a variable number of worker threads.  The first input file is a 3.5GB text file.  The second input is a 9GB .mp4 file.  The amount of time it took each file/worker thread combination to run was recorded, as well as if the compressed file could be successfully recovered via decompression (without distorting, losing, or corrupting data).
 
+It is worth noting that this data was obtained on a machine with 32 GB RAM and an 11th generation Intel core processor (operating at 2.9 GHz).
+
 **16 KB Block Data**
 | File type | Number of worker threads | Runtime (seoncds) | Successful Compression (yes/no) |
 | --- | ----- | ----- | --- |
