@@ -6,7 +6,7 @@ The goal for this project was to create an applicable c++ program that demonstra
 
 This project assumes that the z-standard compression library is properly installed (see https://github.com/facebook/zstd for instructions).  It is also assumed that the *common.h* is downloaded along side *compress_with_threads*, the primary C++ file.  Compile *compress_with_threads.cpp* using the *-lzstd* flag.  An example compiling command is *g++ compress_with_threads.cpp -o outfile -lzstd*.  
 
-When running the code, three command line arguments should be passed in.  The first is the number of worker threads to be used at a time during runtime.  The second is the name of the file (including file location) of the file to be compressed.  The third is the filename (including file location) that should be given to the newly compressed version of the input file.  It is advisable not to give it the same name in the same location as the input file.
+When running the code, three command line arguments should be passed in.  The first is the number of worker threads to be used at a time during runtime.  The second is the name of the file (including file location) of the file to be compressed.  The third is the filename (including file location) that should be given to the newly compressed version of the input file.  It is advisable not to give it the same name in the same location as the input file.  An example of how to run the program would be ./outfile 6 inputfile.txt outputfile.txt.zst, which would run using 1 main thread and 5 worker threads.
 
 If automated results want to be generated for variable number of threads, *test_compression.sh* can be used.  The number of threads and name of input files need to be altered as desired.
 
