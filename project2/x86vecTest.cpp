@@ -2,9 +2,9 @@
 #include <iostream>
 
 int main(void){
-    float mat_a[8][8];
-    float mat_b[8][8];
-    float mat_o[8][8];
+    alignas(32) float mat_a[8][8];
+    alignas(32) float mat_b[8][8];
+    alignas(32) float mat_o[8][8];
     //put in dummy values in a and b
     for (int row = 0; row < 8; row++){
         for (int col = 0; col < 8; col++){
@@ -13,14 +13,14 @@ int main(void){
         }
     }
 
-    __m256 b[8];
+    alignas(32) __m256 b[8];
     for(int row = 0; row < 8; row++){
         //initialize matrix b into vector format (occupies 8 registers)
-        b[row] = _mm256_load_ps(mat_b[row]);
+        b[row] = _mm256_load_ps(&mat_b[row][0]);
     }
 
-    __m256 rowOut;
-    __m256 mulVec;
+    alignas(32) __m256 rowOut;
+    alignas(32) __m256 mulVec;
     for(int out_row = 0; out_row < 8; out_row++){
         //compute output 1 row at a time
         //initialize output register as 0
