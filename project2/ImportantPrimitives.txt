@@ -1,0 +1,18 @@
+32 bit operation
+Load:
+_mm256_i32gather_ps()
+_mm256_load_ps(float const * mem_addr)
+
+Store:
+void _mm256_store_ps (float * mem_addr, __m256 a)
+
+Multiply:
+__m256 _mm256_fmadd_ps (__m256 a, __m256 b, __m256 c)
+__m256 _mm256_mul_ps (__m256 a, __m256 b)
+
+Add:
+__m256 _mm256_add_ps (__m256 a, __m256 b)
+
+Set:
+__m256 _mm256_set_ps (float e7, float e6, float e5, float e4, float e3, float e2, float e1, float e0)
+__m256 _mm256_set1_ps (float a)
