@@ -15,22 +15,14 @@ It is worth noting that this data was obtained on a machine with 32 GB RAM and a
 **16 KB Block Data**
 | Data Type | Size of Matrices | Student-Implemented Multiplication Runtime | Naive-Implemented Multiplication Runtime | Successful Compression (yes/no) |
 | --- | ----- | ----- | --- |
-| .txt file (3.5 GB) | 25 | 1:03 | Yes |
-| .mp4 file (9 GB) | 25 | 4:59 | Yes |
-| .txt file (3.5 GB) | 50 | 1:59 | Yes |
-| .mp4 file (9 GB) | 50 | 5:32 | Yes |
-| .txt file (3.5 GB) | 100 | 2:01 | Yes |
-| .mp4 file (9 GB) | 100 | 5:22 | Yes |
-| .txt file (3.5 GB) | 200 | 2:06 | Yes |
-| .mp4 file (9 GB) | 200 | 5:12 | Yes |
-| .txt file (3.5 GB) | 350 | 1:55 | Yes |
-| .mp4 file (9 GB) | 350 | 4:58 | Yes |
-| .txt file (3.5 GB) | 500 | 1:35 | Yes |
-| .mp4 file (9 GB) | 500 | 4:04 | Yes |
-| .txt file (3.5 GB) | 750 | 1:03 | Yes |
-| .mp4 file (9 GB) | 750 | 4:09 | Yes |
-| .txt file (3.5 GB) | 1000 | 1:47 | Yes |
-| .mp4 file (9 GB) | 1000 | 4:54 | Yes |
+| 2 Byte Fixed Point | 1000x1000 | : | : | Yes |
+| 4 Byte Floating Point | 1000x1000 | : | : | Yes |
+| .txt file (3.5 GB) | 3000x3000 | : | : | Yes |
+| .mp4 file (9 GB) | 3000x3000 | : | : | Yes |
+| .txt file (3.5 GB) | 5000x5000 | : | : | Yes |
+| .mp4 file (9 GB) | 5000x5000 | : | : | Yes |
+| .txt file (3.5 GB) | 10000x10000 | : | : | Yes |
+| .mp4 file (9 GB) | 10000x10000 | : | : | Yes |
 
 # Analysis
 
