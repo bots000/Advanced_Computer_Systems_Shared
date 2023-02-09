@@ -14,7 +14,7 @@ It is worth noting that this data was obtained on a machine with 32 GB RAM and a
 
 **16 KB Block Data**
 | Data Type | Size of Matrices | Student-Implemented Multiplication Runtime | Naive-Implemented Multiplication Runtime | Successful Compression (yes/no) |
-| --- | ----- | ----- | --- |
+| --- | ----- | ----- | ----- | --- | 
 | 2 Byte Fixed Point | 1000x1000 | : | : | Yes |
 | 4 Byte Floating Point | 1000x1000 | : | : | Yes |
 | .txt file (3.5 GB) | 3000x3000 | : | : | Yes |
