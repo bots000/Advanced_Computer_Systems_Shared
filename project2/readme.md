@@ -1,12 +1,41 @@
-This code works for multiplying matrices that are not too large --- it can do a 640x640, but not a 768x768.
-I don't think it will work if matrix size is not a multiple of 8.
+# Introduction
 
-The error gotten is a segmentation fault that occurs before the main function is run --- I think it must have to be due to the fact that at a certain point,
-the data structures made are too large (hold too many pointers) that the allocated memory cannot be handled --- this is along the lines of something that
-I saw online, but I do not completely understand it or why it is happening.  This is something I think we should talk about and look at together.
 
-Other than that, though, the code is documented and runs well.  I put what you did in a function, then wrote code that will generate a bunch of these 8x8
-matrices to multiply and add the values to the correct spots in the output matrix.  I might end up making too many variables for this to still be cache efficient
-- the only thing that I truly wanted to have setup in memory was mat_o, but I ran into problems with getting sub-arrays of a_mat and b_mat, and then into problems
-making what you had a function.  I think the move might be to figure out how to get sub-arrays with iterators (I once knew how but have forgotten) and take what you
-wrote out of the function and just insert it back into main.
+
+# How To Run
+
+
+
+# Experimental Results
+
+The program was run on the same two input files using a variable number of worker threads.  The first input file is a 3.5GB text file.  The second input is a 9GB .mp4 file.  The amount of time it took each file/worker thread combination to run was recorded, as well as if the compressed file could be successfully recovered via decompression (without distorting, losing, or corrupting data).
+
+It is worth noting that this data was obtained on a machine with 32 GB RAM and an 11th generation Intel core processor (operating at 2.9 GHz).
+
+**16 KB Block Data**
+| Data Type | Size of Matrices | Student-Implemented Multiplication Runtime | Naive-Implemented Multiplication Runtime | Successful Compression (yes/no) |
+| --- | ----- | ----- | --- |
+| .txt file (3.5 GB) | 25 | 1:03 | Yes |
+| .mp4 file (9 GB) | 25 | 4:59 | Yes |
+| .txt file (3.5 GB) | 50 | 1:59 | Yes |
+| .mp4 file (9 GB) | 50 | 5:32 | Yes |
+| .txt file (3.5 GB) | 100 | 2:01 | Yes |
+| .mp4 file (9 GB) | 100 | 5:22 | Yes |
+| .txt file (3.5 GB) | 200 | 2:06 | Yes |
+| .mp4 file (9 GB) | 200 | 5:12 | Yes |
+| .txt file (3.5 GB) | 350 | 1:55 | Yes |
+| .mp4 file (9 GB) | 350 | 4:58 | Yes |
+| .txt file (3.5 GB) | 500 | 1:35 | Yes |
+| .mp4 file (9 GB) | 500 | 4:04 | Yes |
+| .txt file (3.5 GB) | 750 | 1:03 | Yes |
+| .mp4 file (9 GB) | 750 | 4:09 | Yes |
+| .txt file (3.5 GB) | 1000 | 1:47 | Yes |
+| .mp4 file (9 GB) | 1000 | 4:54 | Yes |
+
+# Analysis
+
+
+
+# Conclusion
+
+
