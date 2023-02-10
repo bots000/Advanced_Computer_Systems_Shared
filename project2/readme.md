@@ -66,8 +66,16 @@ It is worth noting that this data was obtained on a machine with the following h
 n/a*: these runs took longer than multiple hours, and didn't finish running within a time reasonable enough to record on a personal device.
 # Analysis
 
+In all trials, utilizing the hardware more efficiently led to significantly faster run times. This can be clearly seen in the graphs below. For each implementation, at every tested size, it was advantageous to use the built in processor support for vector multiplication. Additionally, it was increasingly more important to use the optimized program as the size scaled and ineffiencies in the naive approach, like cache misses and SISD workflows, stacked up.
 
+![alt text](https://github.com/bots000/Advanced_Computer_Systems_Shared/blob/d44147e1fbbd45d7de1bde835398db2646bbbd1c/project2/Graphs/Floating_Point.png?raw=true)
+
+![alt text](https://github.com/bots000/Advanced_Computer_Systems_Shared/blob/d44147e1fbbd45d7de1bde835398db2646bbbd1c/project2/Graphs/Fixed_Point.png?raw=true)
+
+It can be seen that when using AVX, the floating point operations performed at a faster rate than the fixed point operations. This is fairly counterintuitive, given as floating points would be assumed to be more (or at least as) computationally intensive to work with compared to fixed point numbers. However, the performance degradation comes from the less effective AVX instructions. These instructions required more steps to work with, since data was not as neatly managed as floating points. With better support, we would expect to see much better performance from the fixed point implementation.
 
 # Conclusion
+
+
 
 
