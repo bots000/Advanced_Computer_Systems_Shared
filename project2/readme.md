@@ -37,7 +37,7 @@ The following SIMD commands were used for the 2-byte fixed point number multipli
 
 # How to Run
 
-To compile this code, be sure to have the three main files,  mat_mult_main.cpp, mat_mult_float.cpp, and mat_mult_uint16.cpp, downloaded and saved in the same directory.  mat_mult_float.cpp and mat_mult_uint16.cpp are included in mat_mult_main.cpp, so only one file needs to be compiled.  To compile this project, g++ was used.  Certain flags need to be set during compiling to ensure that the AVX library of SIMD commands can properly run.  An example of these flags, and how to compile, is shown below.
+To compile this code, be sure to have the three main files,  mat_mult_main.cpp, mat_mult_float.cpp, and mat_mult_uint16.cpp, downloaded and saved in the same directory.  These three main files are the only contents of the github needed to perform this project, and they are all found in the final_code folder.  mat_mult_float.cpp and mat_mult_uint16.cpp are included in mat_mult_main.cpp, so only one file needs to be compiled.  To compile this project, g++ was used.  Certain flags need to be set during compiling to ensure that the AVX library of SIMD commands can properly run.  An example of these flags, and how to compile, is shown below.
 
 g++ -march=native -mavx mat_mult_main.cpp -o outfile
 
