@@ -76,6 +76,6 @@ It can be seen that when using AVX, the floating point operations performed at a
 
 # Conclusion
 
-
+Overall, utilizing hardware SIMD capabilities as well as optimizing for cache hits and register utilization had profound benefits for matrix multiplication. Naive implementations, despite being written and compiled in c++ (and therefore fairly fast compared to being written in other languages), are much slower and scale very poorly to larger matrices (10,000 X 10,000 and up). By using AVX, we were able to drastically cut down the runtime of matrix multiplication and present a better scaleable solution. This AVX based solution highlights a core fact; parallelizeable tasks (such as matrix multiplication) will benefit dramatically from specialized hardware. In applications where these tasks are present (machine learning, graphics processing), it can be critical to power efficiency and latency that these hardware elements are implemented. All in all, in applications where tasks are parallelizeable, it is in the best interests of developers to optimize for the hardware capabilities available to them.
 
 
