@@ -38,8 +38,30 @@ sudo make
 
 It is important to note that it is recommended to partition a portion of your hard drive when using FIO.  The partitioned drive used for these simulations was a 10 GB segment of the main hard drive.
 
-# Sample Commands
+# Simulation Commands
 
+As previously mentioned, the only relevant command available in MLC is --loaded_latency.  This function measures how latency changes as bandwidth demand increases.  It does this by first loading the system as much as allowed to determine the maximum bandwidth.  It then injects artifical delays, throttling the bandwidth and effectively decreasing system utilization.  This is to simulate the system under different loads.  As injected delay approaches infinity, latency values approach idle values.  Injecting delay is equivalent to decreasing the iodepth in FIO.  Unfortunately, there is no way to hardset the latency or bandwidth values.  Additionally, server utilization is not known (it is just known how it changes with delay), so comparing throughput and latency at the same delay points on different runs does not gaurantee that they were measured at the same server utilization.  This makes it impossible to view how latency changes with changes in bandwidth at a constant utiliztion.  For this reason, the only trend attempted to be captured was if both latency and throughput decrease with decreased utilzation (more delay).  As per the project requirements, this was done for different sizes and read intesity ratios.  
+
+MLC automatically injects delay, so no options had to be toggled to have this occur.  It was found in documentation that the -bX flag will perform the --loaded_latency command on data size of X (X=4k for a 4KB file).  Additionally, it was found that the -WX flag will alter the read intensity ratio.  Excluding this flag will result in 100% read, including -W3 will result in 75% read, including -W5 will result in 50% read, and including -W6 will result in 0% read (100% write).  An example of a MLC command for 75% read on a 4 KB file is shown below.  Another flag worth mentioning is the -d0 flag.  When this is observed, no delay is injected in the run, and only one latency/throuput combination is measured.  This is useful for observing supossed maximum bandwidth.
+
+./mlc.exe --loaded_latency -b4k -W3
+
+A range of commands were run, varying the data file size, read intensity ratio, and injected delay.  The bash script used to generate these runs is included as mlc_run.sh.  The resulting output from MLC is included in mlc_run_log and the important results are shown in the Experimental Results section.
+
+Opposite of the little control given to the user by MLC, FIO allowed for nearly everything to be an option.  Particularly, server utilization could be set by the means of setting iodepth: increasing the iodepth increases the storage access queue depth.  Increasing this, according to queueing theory, should increase the bandwidth and latency of the run as well.  These results can be easily observed using FIO.  Additionally, FIO allows for read intensity ratio to be set.  Therefore, the MLC simulations could be mimicked with increased iodepth control.
+
+To perform a FIO simulation, a job file had to be created.  The job file used can be found as ssd_run_fio_ini_file.txt.  It is important to note that the contents of this file were pasted as a .ini file, the extension required for FIO job files.  In this job file, all runs used the ioengine libaio - this is because default ioengines do not allow the measurement of bandwidth and latency at the same time, but libaio does.  The reading/writing sequence was set to randomly perform a mix of reads and writes, restricted to the specified ratio.  An example job file using the libaio engine, random read/writes with 75% read intensity, and the minimum iodpeth on a 4KB file is shown below.
+
+[global]
+ioengine=libaio
+rw=randrw
+
+[job1]
+size=4k
+iodepth=1
+rwmixread=75
+
+It is important to note that a minimum file size of 16 KB was used for FIO simulations - this is because for smaller files, the simulation did not reliably perform the needed reads and writes for a mixed intensity.  With larger file sizes, however, this issue was remedied.
 
 # Experimental Results
 
@@ -272,8 +294,8 @@ Plans for going through results:
 Graphs needed:
   - MLC latency vs delay (for same percent, size)
   - MLC throughput vs delay (for same percent, size)
-  - MLC size and percentage latency heatmap
-  - MLC size and percentage throughput heatmap
+  - MLC size and percentage latency heatmap (for 0 delay)
+  - MLC size and percentage throughput heatmap (for 0 delay)
   - FIO size vs latency (for same percent, iodepth)
   - FIO size vs throughput (for same percent, iodepth)
   - FIO iodpeth vs latency (for same percent, size)
