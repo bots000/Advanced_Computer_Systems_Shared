@@ -3,6 +3,11 @@
 
 # Queueing Theory Overview
 
+emphasis on:
+
+utilizaiton = arrival rate * average time to service a task (for same utilization, latency and bandwidth are inversly correlated)
+and 
+L_queue = util^2/(1-util) (for varying utilizaiton, latency and bandwidth are directly correlated)
 
 # Simulation Environment and Settings
 
