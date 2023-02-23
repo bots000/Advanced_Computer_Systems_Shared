@@ -269,6 +269,17 @@ Plans for going through results:
     - explain loaded_latency results: as injected delay increases, the system is bottlenecking itself and using less utilization.  Therefore, the product is expected to decrease
     - there is no way to hold system utilization the same as we did with FIO, but we can see with larger data accesses, more utilization is needed (latency*BW)
 
+Graphs needed:
+  - MLC latency vs delay (for same percent, size)
+  - MLC throughput vs delay (for same percent, size)
+  - MLC size and percentage latency heatmap
+  - MLC size and percentage throughput heatmap
+  - FIO size vs latency (for same percent, iodepth)
+  - FIO size vs throughput (for same percent, iodepth)
+  - FIO iodpeth vs latency (for same percent, size)
+  - FIO iodpeth vs throughput (for same percent, size)
+  - analyze 100% read vs. 100% write on FIO
+
 # Conclusion
 
 
