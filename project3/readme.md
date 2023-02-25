@@ -283,6 +283,9 @@ This baseline test revealed that both simulators performed as expected.  With th
 After physical testing, the latency between DRAM and solid state storage is shown to be 1000x longer. This is consistent with estimates previously mentioned above. Beyond this, these two mediums need to be analyzed separately. 
 
 ## SSD Performance
+
+First, from the performance data, it can be seen that the write-only IOPS are significantly higher than that of the enterprise-grade Intel D7-P5600. This can be attributed to the fact that this enterprise-grade SSD is most likely designed for several more important characteristics. For instance, data reliability, physical resilience (specifically heat), rewriteability/lifespan could all be design areas more important to an enterprize application than the speed of an individual drive. For the consumer, however, speed is often the only specification considered and therefore very important to a manufacturer on consumer products. This would explain the higher IOPS observed
+
 With FIO, there were many different elements which could be tweaked to get interesting and relevant data. However, with so many knobs to turn, there are many overlapping effects which need to be isolated. The this section will walk through all different elements and explain what effect each variable had. For comparison, utilization is approximated by taking the latency - bandwidth product. This is because these are both indicators of usage.
 
 First, as shown below, utilization scaled with file size. This is fairly logical and is consistent with expectations. Larger file sizes will naturally be able to utilize the resources available, therefore increasing the overall utilization. 
