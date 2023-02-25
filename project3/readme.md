@@ -280,6 +280,29 @@ This baseline test revealed that both simulators performed as expected.  With th
 | 152   | 64 | 0     | 20000  | 11.82        | 5431.7      |
 
 # Analysis
+After physical testing, the latency between DRAM and solid state storage is shown to be 1000x longer. This is consistent with estimates previously mentioned above. Beyond this, these two mediums need to be analyzed separately. 
+
+## SSD Performance
+With FIO, there were many different elements which could be tweaked to get interesting and relevant data. However, with so many knobs to turn, there are many overlapping effects which need to be isolated. The this section will walk through all different elements and explain what effect each variable had. For comparison, utilization is approximated by taking the latency - bandwidth product. This is because these are both indicators of usage.
+
+First, as shown below, utilization scaled with file size. This is fairly logical and is consistent with expectations. Larger file sizes will naturally be able to utilize the resources available, therefore increasing the overall utilization. 
+
+![alt text](https://github.com/bots000/Advanced_Computer_Systems_Shared/blob/main/project3/Graphs/SSD_Util_vs_Size.png?raw=true)
+
+Next, utilization scaled with increased read %. This is likely due to the writes being handled somewhat transparently by the ssd. This would allow for writes to "occur" in a fraction of their actual time. Reads, however, cannot be handled transparently because they need to actually access the contents and the file is not in memory.
+
+![alt text](https://github.com/bots000/Advanced_Computer_Systems_Shared/blob/main/project3/Graphs/SSD_Util_vs_Read_D4.png?raw=true)
+
+Below are several graphs showing the utilization vs the IO depth (effectively queue size per thread) isolated by read percentage. As anticipated, greater queue size increases the uilization (except for pure writes). In the case of pure writes, as seen below, it peaks and then decreases for an IO depth of 16. The most logical explanation is that the ability of the SSD to handle writes transparently was saturated and thus became limited in the longer trial of more writes.
+
+![alt text](https://github.com/bots000/Advanced_Computer_Systems_Shared/blob/main/project3/Graphs/SSD_Util_vs_Depth_R100.png?raw=true)
+![alt text](https://github.com/bots000/Advanced_Computer_Systems_Shared/blob/main/project3/Graphs/SSD_Util_vs_Depth_R50.png?raw=true)
+![alt text](https://github.com/bots000/Advanced_Computer_Systems_Shared/blob/main/project3/Graphs/SSD_Util_vs_Depth_R0.png?raw=true)
+
+Finally, it is important to view the latency as IO depth increases (and thus queue length). Below are the graphs showing the latency trend as IO depth increases again isolated by different read percentages. As can be anticipated, in the cases where queue length is larger and utilization is higher (previous graphs), latency is also increasing. Again, though at reading 0%, the behavior is unexpected and is likely tied to the transparent behavior described prior.
+
+![alt text](https://github.com/bots000/Advanced_Computer_Systems_Shared/blob/main/project3/Graphs/SSD_Latency_vs_Depth.png?raw=true)
+
 
 Plans for going through results:
   - initially compare MLC vs. FIO (SSD takes at least 1000 times longer - consistent with what we got)
