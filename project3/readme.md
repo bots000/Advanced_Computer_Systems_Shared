@@ -316,5 +316,5 @@ Another difference compared to the SSD is the effect of read percentage on bandw
 
 # Conclusion
 
-
+Overall, Queueing Theory can explain much of the behavior exhibite by these devices. In many cases, when queue size increased, average bandwidth also increased. In cases where a queue was able to form, latency grew. However, certain functionalities can lead to potentially counter-intuitive behavior. Transparent functionality in the SSD could lead to results that are inconsistent with trends and cause activities to not scale uniformly. Memory not getting saturated by requests could mean that latency is not observed to be affected, despite the fact that it will have to at some point suffer greater delays
 
