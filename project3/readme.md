@@ -303,27 +303,16 @@ Finally, it is important to view the latency as IO depth increases (and thus que
 
 ![alt text](https://github.com/bots000/Advanced_Computer_Systems_Shared/blob/main/project3/Graphs/SSD_Latency_vs_Depth.png?raw=true)
 
+## DRAM Performance
+With MLC, there are far fewer knobs to turn when it comes to testing. The main means of variance comes from the delay injection, which effectively decreases lambda, or the rate of requests being made. As shown below, by increasing the delay, the bandwidth decreases significantly, which is fairly logical as the throughput of the device will be much lower if the memory is relatively inactive. Interestingly, there seemed to be no particular correlation between delay and latency in either size case. This could be due to memory bandwidth never getting fully saturated (able to service all requests in the same timeframe because they didn't cause a queue). Perhaps a larger size would yield different results. In any case latency seemed unaffected in all cases.
 
-Plans for going through results:
-  - initially compare MLC vs. FIO (SSD takes at least 1000 times longer - consistent with what we got)
-  - give FIO results
-    - talk about the overall product increase as IO depth increases
-    - talk about how BW increases and latency decreases as the file size increases at the same IO
-    - talk about the differences that can be seen for read/write
-  - give MLC results
-    - explain loaded_latency results: as injected delay increases, the system is bottlenecking itself and using less utilization.  Therefore, the product is expected to decrease
-    - there is no way to hold system utilization the same as we did with FIO, but we can see with larger data accesses, more utilization is needed (latency*BW)
+![alt text](https://github.com/bots000/Advanced_Computer_Systems_Shared/blob/main/project3/Graphs/DRAM_BW_vs_Delay.png?raw=true)
+![alt text](https://github.com/bots000/Advanced_Computer_Systems_Shared/blob/main/project3/Graphs/DRAM_Latency_vs_Delay.png?raw=true)
 
-Graphs needed:
-  - MLC latency vs delay (for same percent, size)
-  - MLC throughput vs delay (for same percent, size)
-  - MLC size and percentage latency heatmap (for 0 delay)
-  - MLC size and percentage throughput heatmap (for 0 delay)
-  - FIO size vs latency (for same percent, iodepth)
-  - FIO size vs throughput (for same percent, iodepth)
-  - FIO iodpeth vs latency (for same percent, size)
-  - FIO iodpeth vs throughput (for same percent, size)
-  - analyze 100% read vs. 100% write on FIO
+Another difference compared to the SSD is the effect of read percentage on bandwidth and latency. First, as shown below, for both 4B and 64B, the latency is effectively uncorrelated with the read percentage. There are certainly some variances, but they can't be easily attributed to the read percentage. For bandwidth, however, we can see that the bandwidth peaks with a mixed read/write setting. This can be reasoned to be due to potential parallelizations that can occur or better optimizations the memory controller can make when handling both requests. In either case, it becomes clear that a mixed queue raises the average IO bandwidth.
+
+![alt text](https://github.com/bots000/Advanced_Computer_Systems_Shared/blob/main/project3/Graphs/DRAM_Latency_vs_Read.png?raw=true)
+![alt text](https://github.com/bots000/Advanced_Computer_Systems_Shared/blob/main/project3/Graphs/DRAM_BW_vs_Read.png?raw=true)
 
 # Conclusion
 
