@@ -35,7 +35,7 @@ void* encode(void* dIn){
     string t;
     int count = ((struct datPack*)dIn)->count_start;
     while ( a >> t){
-        temp_dict[t] = count;
+        temp_dict.insert(pair<string, int>(t, count));
         count++;
     }
 

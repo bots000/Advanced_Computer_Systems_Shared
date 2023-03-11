@@ -431,7 +431,7 @@ public:
         if (cursor != NULL) {
             if (cursor->is_leaf){
                 for (int i = 0; i < cursor->size; ++i) {
-                    std::cout << cursor->item[i] << " ";
+                    std::cout << cursor->item[i]  << " " << cursor->encode[i]<< " ";
                 }
             }
             std::cout << "\n";
