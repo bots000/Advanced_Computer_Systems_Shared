@@ -11,13 +11,77 @@
 #include <cstring>
 #include <tuple>
 #include <pthread.h>
+#include <vector>
 #include <immintrin.h>
 
 using namespace std;
 
-int* findIndeces(size_t* array){
+vector<size_t> findIndices(size_t* array, size_t query_value, int length){
+    __m256i vectorArr[8];
+    __m256i mask;
+    __m256i compareVec;
+    int mask_as_int;
+    unsigned int index_offset;
+    int index_counter = 0;
+    vector<size_t> indices;
+    //indices = (int*) malloc(50*sizeof(int));
+
+    int full_blocks = length / 32;
+    int excess_blocks = length % 32;
+    int full_vectors = excess_blocks / 4;
+    int excess_pieces = excess_blocks % 4;
+
+    compareVec = _mm256_set1_epi64x(query_value);
+    for(int compare_blocks = 0; compare_blocks <= full_blocks; compare_blocks++){
+        //load 8 blocks of 4
+        if((compare_blocks < full_blocks)){
+            for(int i = 0; i < 8; i++){ //32 bytes per vector 256 bit, 
+                vectorArr[i] = _mm256_load_si256( (__m256i const *) (array + 4*i + (4*8)*compare_blocks));
+            }
+        }else if(compare_blocks == full_blocks){
+            for(int i = 0; i <= full_vectors; i++){ //32 bytes per vector 256 bit, 
+                if ((i < full_vectors)){
+                    vectorArr[i] = _mm256_load_si256( (__m256i const *) (array + 4*i + (4*8)*compare_blocks));
+                } else if ((excess_pieces != 0)&&(i == full_vectors)){
+                    int e0 = array[4*i + (4*8)*compare_blocks];
+                    int e1 = 0;
+                    if (excess_pieces >= 2){
+                        e1 = array[4*i + (4*8)*compare_blocks + 1];
+                    }
+                    int e2;
+                    if (excess_pieces >= 2){
+                        e2 = array[4*i + (4*8)*compare_blocks + 2];
+                    }
+                    int e3 = 0;
+                    vectorArr[i] = _mm256_setr_epi64x(e3, e2, e1, e0);
+                }
+            }
+        }
+        
+        //compare all 8
+        int endval = 8;
+        if (compare_blocks == full_blocks){
+            endval = full_vectors;
+            if (excess_pieces != 0){
+                endval ++;
+            }
+        }
+        for(int i = 0; i < endval; i++){
+            mask = _mm256_cmpeq_epi64(vectorArr[i], compareVec);
+            mask_as_int = _mm256_movemask_pd(_mm256_castsi256_pd(mask)); //mask as int -> 0x28 [1/0 for val 3] [1/0 for val 2] [1/0 for val 1] [1/0 for val 0]
+            while(mask_as_int != 0){
+                index_offset = _tzcnt_u32(mask_as_int);// for 0010, tzcnt = 1, for tzcnt
+                indices.push_back(compare_blocks*32 + i*4 + index_offset);
+                cout << "found 1 at " << indices[index_counter] << endl;
+                index_counter++;
+                mask_as_int &= ~(1 << index_offset); //set the index as 0 to get next if in there
+            }
+
+        }
+    }
     //_mm256_load_si256 (__m256i const * mem_addr) for load
     //__m256i _mm256_cmpeq_epi64 (__m256i a, __m256i b) for compare
+    return indices;
 }
 
 struct datPack {
@@ -88,7 +152,7 @@ int main(int argc, char *argv[]) {
     map<string, size_t> master_dict;
 
     // get new instance of the file so that each line can be read in for its value
-    ifstream txt ("rand_teams.txt");
+    ifstream txt ("Column.txt");
     stringstream file_contents;
     file_contents << txt.rdbuf();
 
@@ -102,7 +166,7 @@ int main(int argc, char *argv[]) {
     int end_num = num_lines + num_threads;
 
     string t;
-    ifstream txt2 ("rand_teams.txt");
+    ifstream txt2 ("Column.txt");
 
     // initialize the array of threads and array of data, including dummy threads
     pthread_t thread_array[num_threads];
@@ -180,9 +244,14 @@ int main(int argc, char *argv[]) {
         }
     }
 
+    
+    vector<size_t> indices;
+    indices = findIndices(encoded_array, encoded_array[0], 1000);
+
 
     // Go through and construct the B tree from the data
     map<string, size_t>::iterator i;
+    
 	for (i=master_dict.begin(); i!=master_dict.end(); ++i){
 		bpt.insert((*i).first, (*i).second);
 	}
