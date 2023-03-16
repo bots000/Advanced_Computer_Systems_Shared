@@ -10,7 +10,7 @@ struct Node {
     std::size_t degree; // maximum number of children
     std::size_t size; // current number of item
     T* item;
-    int* encode;
+    size_t* encode;
     Node<T>** children;
     Node<T>* parent;
 
@@ -21,7 +21,7 @@ public:
         this->size = 0;
 
         T* _item = new T[degree-1];
-        int* _encode = new int[degree-1];
+        size_t* _encode = new size_t[degree-1];
         for(int i=0; i<degree-1; i++){
             _item[i] = " ";
             _encode[i] = -1;
@@ -139,6 +139,10 @@ public:
     int find_index(T* arr, T data, int len){
         int index = 0;
         for(int i=0; i<len; i++){
+            if(data == arr[i]){
+                index=i;
+                break;
+            }
             if(data < arr[i]){
                 index = i;
                 break;
@@ -150,7 +154,7 @@ public:
         }
         return index;
     }
-    T* item_insert(T* arr, T data, int len){
+    std::pair<T*, size_t*> item_insert(T* arr, size_t* arr2, T data, size_t data2, int len){
         int index = 0;
         for(int i=0; i<len; i++){
             if(data < arr[i]){
@@ -165,33 +169,17 @@ public:
 
         for(int i = len; i > index; i--){
             arr[i] = arr[i-1];
+            arr2[i] = arr2[i-1];
         }
 
         arr[index] = data;
+        arr2[index] = data2;
 
-        return arr;
-    }
-
-    int* encode_insert(int* arr, int data, int len){
-        int index = 0;
-        for(int i=0; i<len; i++){
-            if(data < arr[i]){
-                index = i;
-                break;
-            }
-            if(i==len-1){
-                index = len;
-                break;
-            }
-        }
-
-        for(int i = len; i > index; i--){
-            arr[i] = arr[i-1];
-        }
-
-        arr[index] = data;
-
-        return arr;
+        std::pair<T*, size_t*> PAIR; 
+        PAIR.first = arr;
+        PAIR.second = arr2;
+        
+        return PAIR;
     }
 
     Node<T>** child_insert(Node<T>** child_arr, Node<T>*child,int len,int index){
@@ -202,7 +190,7 @@ public:
         return child_arr;
     }
 
-    Node<T>* child_item_insert(Node<T>* node, T data, int encode_data, Node<T>* child){
+    Node<T>* child_item_insert(Node<T>* node, T data, size_t encode_data, Node<T>* child){
         int item_index=0;
         int child_index=0;
         for(int i=0; i< node->size; i++){
@@ -232,7 +220,7 @@ public:
         return node;
     }
 
-    void InsertPar(Node<T>* par,Node<T>* child, T data, int encode_data){
+    void InsertPar(Node<T>* par,Node<T>* child, T data, size_t encode_data){
         //overflow check
         Node<T>* cursor = par;
         if(cursor->size < this->degree-1){//not overflow, just insert in the correct position
@@ -247,13 +235,16 @@ public:
 
             //copy item
             T* item_copy = new T[cursor->size+1];
-            int* encode_copy = new int[cursor->size+1];
+            size_t* encode_copy = new size_t[cursor->size+1];
             for(int i=0; i<cursor->size; i++){
                 item_copy[i] = cursor->item[i];
                 encode_copy[i] = cursor->encode[i];
             }
-            item_copy = item_insert(item_copy,data,cursor->size);
-            encode_copy = encode_insert(encode_copy,encode_data,cursor->size);
+
+            std::pair<T*, size_t*> PAIR;
+            PAIR= item_insert(item_copy,encode_copy, data, encode_data, cursor->size);
+            item_copy = PAIR.first;
+            encode_copy = PAIR.second;
 
             auto** child_copy = new Node<T>*[cursor->size+2];
             for(int i=0; i<cursor->size+1;i++){
@@ -289,7 +280,7 @@ public:
             Newnode->children[Newnode->size]->parent=Newnode;
 
             T paritem = item_copy[this->degree/2];
-            int parencode = encode_copy[this->degree/2];
+            size_t parencode = encode_copy[this->degree/2];
 
             delete[] item_copy;
             delete[] encode_copy;
@@ -318,7 +309,7 @@ public:
         }
     }
 
-    void insert(T data, int encoded_data) {
+    void insert(T data, size_t encoded_data) {
         if(this->root == nullptr){ //if the tree is empty
             this->root = new Node<T>(this->degree);
             this->root->is_leaf = true;
@@ -335,8 +326,10 @@ public:
             //overflow check
             if(cursor->size < (this->degree-1)){ // not overflow, just insert in the correct position
                 //item insert and rearrange
-                cursor->item = item_insert(cursor->item,data,cursor->size);
-                cursor->encode = encode_insert(cursor->encode,encoded_data,cursor->size);
+                std::pair<T*, size_t*> PAIR;
+                PAIR= item_insert(cursor->item,cursor->encode, data, encoded_data, cursor->size);
+                cursor->item = PAIR.first;
+                cursor->encode = PAIR.second;
                 cursor->size++;
                 //edit pointer(next node)
                 cursor->children[cursor->size] = cursor->children[cursor->size-1];
@@ -350,15 +343,18 @@ public:
 
                 //copy item
                 T* item_copy = new T[cursor->size+1];
-                int* encode_copy = new int[cursor->size+1];
+                size_t* encode_copy = new size_t[cursor->size+1];
                 for(int i=0; i<cursor->size; i++){
                     item_copy[i] = cursor->item[i];
                     encode_copy[i] = cursor->encode[i];
                 }
 
                 //insert and rearrange
-                item_copy = item_insert(item_copy,data,cursor->size);
-                encode_copy = encode_insert(encode_copy,encoded_data,cursor->size);
+                
+                std::pair<T*, size_t*> PAIR;
+                PAIR= item_insert(item_copy,encode_copy, data, encoded_data, cursor->size);
+                item_copy = PAIR.first;
+                encode_copy = PAIR.second;
 
                 //split nodes
                 cursor->size = (this->degree)/2;
@@ -387,7 +383,7 @@ public:
 
                 //parent check
                 T paritem = Newnode->item[0];
-                int parencode = Newnode->encode[0];
+                size_t parencode = Newnode->encode[0];
 
                 if(cursor->parent == nullptr){//if there are no parent node(root case)
                     auto* Newparent = new Node<T>(this->degree);
