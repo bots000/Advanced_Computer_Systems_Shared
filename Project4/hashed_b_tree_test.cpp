@@ -12,9 +12,20 @@
 #include <tuple>
 #include <pthread.h>
 #include <vector>
+#include <chrono>
 #include <immintrin.h>
 
 using namespace std;
+
+template <
+    class result_t   = std::chrono::milliseconds,
+    class clock_t    = std::chrono::steady_clock,
+    class duration_t = std::chrono::milliseconds
+>
+auto since(chrono::time_point<clock_t, duration_t> const& start)
+{
+    return chrono::duration_cast<result_t>(clock_t::now() - start);
+}
 
 vector<size_t> findIndices(size_t* array, size_t query_value, int length){
     __m256i vectorArr[8];
@@ -129,12 +140,6 @@ void* encode(void* dIn){
     outPack* out = new outPack;//(outPack*) malloc(sizeof(outPack));
     //cout << "e4" << endl;
     (*out).temp_dict = temp_dict;
-    //(*out).encoded_vals = local_encoded;
-    //cout << "e5" << endl;
-    /*for(auto it = (*out).temp_dict.cbegin(); it != (*out).temp_dict.cend(); ++it)
-{
-    cout << it->first << " " << it->second << "\n";
-} */
 
     // return compressed data pointer and size of this data
     pthread_exit(out);
@@ -144,11 +149,12 @@ int main(int argc, char *argv[]) {
 
 	
     
-    // read in input
-    /*int num_threads = atoi(argv[1]);
+    // read in input --- ./out num_threads input_file output_file per_thread
+    int num_threads = atoi(argv[1]);
+    cout << num_threads << endl;
+    int per_thread = atoi(argv[4]);
     char* input_file = argv[2];
-    char* output_file = argv[3];*/
-    int num_threads = 400;
+    char* output_file = argv[3];
 
     // initalize tree and dictionary
     BPlusTree<string> bpt(6);
@@ -157,7 +163,7 @@ int main(int argc, char *argv[]) {
     cout << "Attempting to ifstream the file" << endl;
 
     // get new instance of the file so that each line can be read in for its value
-    ifstream txt ("Column.txt");
+    ifstream txt (input_file);
 
     cout << "Starting the first sequential read" << endl;
 
@@ -174,7 +180,7 @@ int main(int argc, char *argv[]) {
     int end_num = num_lines + num_threads;
 
     string t;
-    ifstream txt2 ("Column.txt");
+    ifstream txt2 (input_file);
 
     // initialize the array of threads and array of data, including dummy threads
     pthread_t thread_array[num_threads];
@@ -187,6 +193,8 @@ int main(int argc, char *argv[]) {
     int index;
     int ret;
 
+    auto start = chrono::steady_clock::now();
+
     for (int i = 0; i<num_threads; i++){
         
         datArr[i] = (datPack*) malloc(sizeof(datPack));
@@ -194,17 +202,16 @@ int main(int argc, char *argv[]) {
 
     // loop through every line in the file
     int counter = 0;
-    int elements_per_thread = 400;
 
-    end_num = ceil(((double) num_lines)/elements_per_thread);
+    end_num = ceil(((double) num_lines)/per_thread);
 
     cout << "Going through the file now" << endl;
 
     // loop through the entire streaming of the input file
     for (int count = 0; count < end_num + num_threads; count++){
-        cout << "On loop " << count << "/" << end_num + num_threads << endl;
+        //cout << "On loop " << count << "/" << end_num + num_threads << endl;
 
-        int num_read = min(elements_per_thread, num_lines-counter);
+        int num_read = min(per_thread, num_lines-counter);
 
     	// get the index of the array for this line
     	index = (count) % num_threads;
@@ -270,17 +277,15 @@ int main(int argc, char *argv[]) {
 
     cout << "Finished making B tree" << endl;
 
-    bpt.bpt_print();
+    cout << "Elapsed(s)=" << ((double) since(start).count())/1000 << endl;
 
-    cout << "Printed B tree" << endl;
-
-    vector<size_t> indices;
+    /*vector<size_t> indices;
     cout << "Finding indices of " << (*master_dict.begin()).first << endl;
     Node<string>* first_element = bpt.BPlusTreeSearch(bpt.getroot(), (*master_dict.begin()).first);
     int index_of_node = bpt.find_index(first_element->item, (*master_dict.begin()).first, num_lines);
     cout << "This corresponds to " << first_element->encode[index_of_node] << endl;
     cout << (*master_dict.begin()).second << endl;
-    indices = findIndices(encoded_array, first_element->encode[index_of_node], num_lines);
+    indices = findIndices(encoded_array, first_element->encode[index_of_node], num_lines);*/
 
     return 0;
 }
