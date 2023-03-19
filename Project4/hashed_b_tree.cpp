@@ -107,6 +107,7 @@ struct datPack {
 
 struct outPack{
     map<string, size_t> temp_dict;
+    char* encoded_str;
     size_t* encoded_vals;
 };
 
@@ -118,6 +119,7 @@ void* encode(void* dIn){
     hash<string> hash_fn;
 
     size_t* local_encoded = ((struct datPack*)dIn)->encoded_vals;
+    string encoded_string = "";
 
     // read through and encode the values in the string
     stringstream a(((struct datPack*)dIn)->str);
@@ -132,12 +134,19 @@ void* encode(void* dIn){
 
         // add the encoded value to the outfile
         local_encoded[i] = hash;
+        encoded_string += to_string(hash) + "\n";
         i++;
     }
 
     // return the dictionary
     outPack* out = new outPack;//(outPack*) malloc(sizeof(outPack));
     (*out).temp_dict = temp_dict;
+
+    const int length = encoded_string.length();
+    char* char_array = new char[length + 1];
+    strcpy(char_array, encoded_string.c_str());
+
+    (*out).encoded_str = char_array;
 
     // return compressed data pointer and size of this data
     pthread_exit(out);
@@ -183,6 +192,8 @@ int main(int argc, char *argv[]) {
         datArr[i] = (datPack*) malloc(sizeof(datPack));
     }
 
+    ofstream os(output_file);
+
     // initialize variables used in the for loop
     int index;
     int ret;
@@ -204,11 +215,12 @@ int main(int argc, char *argv[]) {
     	index = (count) % num_threads;
 
     	if (count >= num_threads){//unpack threads
-            //cout << "Going to attempt to close a thread" << endl;
+            
             ret = pthread_join(thread_array[index], (void**)&dummyPack);
             map<string, size_t> temp_dict = ((struct outPack*)dummyPack)->temp_dict;
+            char* local_encoded_string = ((struct outPack*)dummyPack)->encoded_str;
+            os << local_encoded_string;
             master_dict.insert(temp_dict.begin(), temp_dict.end());
-            //cout << "Thread is closed" << endl;
         }
 
         string to_encode; // to_encode = the next num_read lines 
@@ -255,32 +267,31 @@ int main(int argc, char *argv[]) {
 	}
 
     cout << "Elapsed(s)=" << ((double) since(start).count())/1000 << endl;
+    os.close();
 
     // now we need to write the encoded dictionary and encoded values to a file
     bpt.bpt_write(output_file);
-    ofstream os(output_file, ios::app);
-    for (int i = 0; i < num_lines; i++){
-        os << encoded_array[i] << endl;
-    }
-    os.close();
 
     // this is some dynamic way to search for the indices of the first value in master_dict
-    vector<size_t> indices;
+    /*vector<size_t> indices;
     Node<string>* first_element = bpt.BPlusTreeSearch(bpt.getroot(), (*master_dict.begin()).first);
     int index_of_node = bpt.find_index(first_element->item, (*master_dict.begin()).first, num_lines);
-    indices = findIndices(encoded_array, first_element->encode[index_of_node], num_lines);
+    indices = findIndices(encoded_array, first_element->encode[index_of_node], num_lines);*/
 
     // this will find all data items with given prefix by seaching the tree to prefix:next ascii value up from prefix
-    string prefix = "Co";
+
+
+    /*string prefix = "by";
     char last_part = prefix.back();
     int last_ascii_up_one = int(last_part) + 1;
     char new_up_one_char = char(last_ascii_up_one);
     string end_prefix = prefix;
     end_prefix.back() = new_up_one_char;
 
-    int arr_length = 1000;
+    int arr_length = num_lines;
     string results[arr_length] = {};
     int useless = bpt.range_search(prefix, end_prefix, results, arr_length);
+    cout << results << endl;
     for (int i = 0; i < arr_length; i++){
 
         remove(results[i].begin(), results[i].end(), ' ');
@@ -289,7 +300,7 @@ int main(int argc, char *argv[]) {
             cout << results[i] << endl;
         }
         
-    }
+    }*/
 
 
     return 0;

@@ -42,6 +42,10 @@ Time was measured between the time when the first raw data item is retrieved to 
 
 ## Single Data Item Search Speed Results
 
+In order to test the efficiency of the SIMD search implementation, several items were chosen at random from Column.txt. Only the time to find all indices given the hash was tested. Shown below are the results from the test.
+
+![SIMD Single Query Results](https://raw.githubusercontent.com/bots000/Advanced_Computer_Systems_Shared/main/Project4/plots/SIMD_MatchVsTime.png)
+
 ## Prefix Scan Speed Results
 
 
@@ -53,6 +57,8 @@ Viewing the encoding speed heatmap, the encoding runtime can be viewed as a func
 It became clear that there is a trade-off between these two variables; optimal performance comes when a thread's results are gathered exactly as it finishes running its thread function.  It is of course difficult to determine this exaclty (without an exhaustive number of runs), but it can be observed that this optimal point occurs around 125 threads and 800 data items per thread.
 
 ## Single Data Item Search Speed Results
+
+Shown above, the results show that even for much higher match quantities, the execution time remained around 0.275 seconds. This suggests that the key limiting factor was the ability to move through the array, not the ability to extract indices. This does make sense, given that even for the cases of the highest number of matches, the indices make up a small fraction of the full data. If the inverse was true, it is likely that the relationship would be much more linear between matches and time. Given the current results, if we wanted to speed up the index finding, we would need more AVX units from other cores instead of just 1. Alternatively, switching to a lower sized encoding (32/16/8) would allow for much faster execution by increasing the number of checks per loop. This would come at the cost of using more complicated encoding schemes to prevent overlap. For many cases though, it is more favorable to sacrifice initial encoding time to gain search efficiency.
 
 ## Prefix Scan Speed Results
 
