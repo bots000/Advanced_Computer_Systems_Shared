@@ -33,6 +33,8 @@ The other resource needed to run this the raw column data.  This data should be 
 
 The SIMD search is programmed to only use 8 compare registers and 1 query value at a time in order to minimize page faults when running through the array. It is possible that in other applications it may be more optimal to have several query values at once and only 1 compare register in use for cases where the prefix search is more heavily used. However, we felt it was more important to emphasize the case of 1 query value.
 
+For the SIMD search and prefix tests, 4 csv files are created by default containing the results. 
+
 # Experimental Results
 ## Encoding Speed Results
 
@@ -48,6 +50,11 @@ In order to test the efficiency of the SIMD search implementation, several items
 
 ## Prefix Scan Speed Results
 
+Because the prefix search consists of two distinct elements, fetching encodings and searching the array for indices, they are tested separately. To test different prefixes, items were taken from Column.txt and trimmed to 3-5 characters. Below are the results of 10 tests.
+
+![Prefix Encoding Search Results](https://raw.githubusercontent.com/bots000/Advanced_Computer_Systems_Shared/main/Project4/plots/Pre_MatchVsTime.png)
+
+![Prefix Index Search Results](https://raw.githubusercontent.com/bots000/Advanced_Computer_Systems_Shared/main/Project4/plots/Pre_IndexVsTime.png)
 
 # Analysis
 ## Encoding Speed Analysis
@@ -61,6 +68,8 @@ It became clear that there is a trade-off between these two variables; optimal p
 Shown above, the results show that even for much higher match quantities, the execution time remained around 0.275 seconds. This suggests that the key limiting factor was the ability to move through the array, not the ability to extract indices. This does make sense, given that even for the cases of the highest number of matches, the indices make up a small fraction of the full data. If the inverse was true, it is likely that the relationship would be much more linear between matches and time. Given the current results, if we wanted to speed up the index finding, we would need more AVX units from other cores instead of just 1. Alternatively, switching to a lower sized encoding (32/16/8) would allow for much faster execution by increasing the number of checks per loop. This would come at the cost of using more complicated encoding schemes to prevent overlap. For many cases though, it is more favorable to sacrifice initial encoding time to gain search efficiency.
 
 ## Prefix Scan Speed Results
+
+The results from the prefix search highlight several important aspects of our implementation. First, for the prefix encoding search, the worst case is somewhat decoupled from the amount of expected matches. The reason for the spike in time despite the low matches is likely due the range spanning the boundary of a higher level parent, meaning that more items need to be scanned. A potential solution is a rework of the tree that maps its neighbors together, allowing for an easier traversal across layers. Second, the SIMD query scales strongly with the number of matches. This is because it is doing a single query value at a time, greatly reducing the efficiency. If this were to be reimplemented with an emphasis on ensuring the array is only iterated through once, it is very likely that there would be a significant speedup. 
 
 # Conclusion
 
