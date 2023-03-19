@@ -2,6 +2,7 @@
 #define BPlusTree_H
 
 #include <iostream>
+#include <fstream>
 #include <string>
 
 template <typename T>
@@ -435,6 +436,30 @@ public:
             if (!cursor->is_leaf) {
                 for (int i = 0; i < cursor->size + 1; ++i) {
                     print(cursor->children[i]);
+                }
+            }
+        }
+    }
+
+    void bpt_write(char* outfile){
+        std::ofstream os(outfile);
+        write(this->root, os);
+        os << "\n";
+        os.close();
+    }
+    void write(Node<T>* cursor, std::ostream &os) {
+        // You must NOT edit this function.
+        if (cursor != NULL) {
+            if (cursor->is_leaf){
+                for (int i = 0; i < cursor->size; ++i) {
+                    os << cursor->item[i]  << " " << cursor->encode[i]<< " ";
+                }
+            }
+            os << "\n";
+
+            if (!cursor->is_leaf) {
+                for (int i = 0; i < cursor->size + 1; ++i) {
+                    write(cursor->children[i], os);
                 }
             }
         }

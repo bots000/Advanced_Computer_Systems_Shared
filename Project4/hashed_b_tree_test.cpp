@@ -17,6 +17,7 @@
 
 using namespace std;
 
+// a function used to precisely time the runtime of encoding
 template <
     class result_t   = std::chrono::milliseconds,
     class clock_t    = std::chrono::steady_clock,
@@ -98,6 +99,7 @@ vector<size_t> findIndices(size_t* array, size_t query_value, int length){
     return indices;
 }
 
+// the following two structs are used to pass values to/from the thread worker function
 struct datPack {
     char* str;
     int num_lines;
@@ -113,32 +115,30 @@ struct outPack{
 // the function that is called for each worker thread
 void* encode(void* dIn){
 
-    // convert input back to relevant data types
-
-   /*datPack* dat = (datPack*) dIn;
-   cout << (*dat).count_start << endl;
-   cout << *((*dat).teams) << endl;*/
-    //cout << "e0" << endl;
+    // the temp dictionary and hash_fn to be used for encoding
     map<string, size_t> temp_dict;
-    //cout << "e1" << endl;
     hash<string> hash_fn;
 
+    size_t* local_encoded = ((struct datPack*)dIn)->encoded_vals;
+
+    // read through and encode the values in the string
     stringstream a(((struct datPack*)dIn)->str);
     string t;
-    size_t* local_encoded = ((struct datPack*)dIn)->encoded_vals;
-    //cout << "e2" << endl;
     int i = 0;
     size_t hash;
     while ( a >> t){
+
+        // hash this string and add it to the encoded dictionary
         hash = hash_fn(t);
         temp_dict.insert(pair<string, size_t>(t, hash));
+
+        // add the encoded value to the outfile
         local_encoded[i] = hash;
         i++;
     }
-    //cout << "e3" << endl;
 
+    // return the dictionary
     outPack* out = new outPack;//(outPack*) malloc(sizeof(outPack));
-    //cout << "e4" << endl;
     (*out).temp_dict = temp_dict;
 
     // return compressed data pointer and size of this data
@@ -147,11 +147,8 @@ void* encode(void* dIn){
 
 int main(int argc, char *argv[]) {
 
-	
-    
     // read in input --- ./out num_threads input_file output_file per_thread
     int num_threads = atoi(argv[1]);
-    cout << num_threads << endl;
     int per_thread = atoi(argv[4]);
     char* input_file = argv[2];
     char* output_file = argv[3];
@@ -160,12 +157,8 @@ int main(int argc, char *argv[]) {
     BPlusTree<string> bpt(6);
     map<string, size_t> master_dict;
 
-    cout << "Attempting to ifstream the file" << endl;
-
     // get new instance of the file so that each line can be read in for its value
     ifstream txt (input_file);
-
-    cout << "Starting the first sequential read" << endl;
 
     //int num_lines = count(file_contents.str().begin(), file_contents.str().end(), '\n');
     int num_lines = 0;
@@ -173,8 +166,6 @@ int main(int argc, char *argv[]) {
     while (txt >> line) {
         num_lines++;
     }
-
-    cout << "Finished the first read, nym_lines = " << num_lines << endl;
     
     size_t* encoded_array = (size_t*) aligned_alloc(32,sizeof(size_t)*num_lines);
     int end_num = num_lines + num_threads;
@@ -189,28 +180,26 @@ int main(int argc, char *argv[]) {
     datPack* tmp;
     outPack* dummyPack;
 
-
-    int index;
-    int ret;
-
-    auto start = chrono::steady_clock::now();
-
+    // fill datArr
     for (int i = 0; i<num_threads; i++){
-        
         datArr[i] = (datPack*) malloc(sizeof(datPack));
     }
 
+    // initialize variables used in the for loop
+    int index;
+    int ret;
+
+    // start timing the encoding speed
+    auto start = chrono::steady_clock::now();
+
     // loop through every line in the file
     int counter = 0;
-
     end_num = ceil(((double) num_lines)/per_thread);
-
-    cout << "Going through the file now" << endl;
 
     // loop through the entire streaming of the input file
     for (int count = 0; count < end_num + num_threads; count++){
-        //cout << "On loop " << count << "/" << end_num + num_threads << endl;
-
+        
+        // we will either read the number of lines specified, or the rest of the function
         int num_read = min(per_thread, num_lines-counter);
 
     	// get the index of the array for this line
@@ -224,7 +213,7 @@ int main(int argc, char *argv[]) {
             //cout << "Thread is closed" << endl;
         }
 
-        string to_encode; // to_encode = the next 50 lines 
+        string to_encode; // to_encode = the next num_read lines 
         int c = 0;
         while (txt2 >> t){
 
@@ -240,44 +229,42 @@ int main(int argc, char *argv[]) {
 
         if (count < end_num){
 
-            //cout << "Starting making a new thread, counter is " << counter << "/" << num_lines << endl;
-
-            datPack initpack;
+            // get the struct for the parameter for the worker thread function
             tmp = datArr[index];
 
-
+            // convert our string to char*
             const int length = to_encode.length();
             char* char_array = new char[length + 1];
             strcpy(char_array, to_encode.c_str());
 
-            //struct datPack *tmp = (struct datPack *)malloc(sizeof(struct datPack));
-
+            // pass in the needed values to the thread worker function
             tmp->str = char_array;
             tmp->num_lines = length;
             tmp->encoded_vals = (size_t*) (encoded_array+(counter-num_read));
-
-            //cout << (*tempPack).teams << endl;
             
             // make the thread and add it to the correct spot of the array
             pthread_t temp_thread;
             ret = pthread_create(&temp_thread, NULL, encode, (void*)tmp);
             thread_array[index] = temp_thread;
-
-            //cout << "Successfully made a new thread" << endl;
         }
     }
 
 
     // Go through and construct the B tree from the data
     map<string, size_t>::iterator i;
-    cout << "Making B tree" << endl;
 	for (i=master_dict.begin(); i!=master_dict.end(); ++i){
 		bpt.insert((*i).first, (*i).second);
 	}
 
-    cout << "Finished making B tree" << endl;
-
     cout << "Elapsed(s)=" << ((double) since(start).count())/1000 << endl;
+
+    // now we need to write the encoded dictionary and encoded values to a file
+    bpt.bpt_write(output_file);
+    ofstream os(output_file, ios::app);
+    for (int i = 0; i < num_lines; i++){
+        os << encoded_array[i] << endl;
+    }
+    os.close();
 
     /*vector<size_t> indices;
     cout << "Finding indices of " << (*master_dict.begin()).first << endl;
