@@ -14,6 +14,8 @@ Once all data is encoded through the process detailed above, the raw data/encode
 # Experimental Results
 ## Encoding Speed Results
 
+Time was measured between the time when the first raw data item is retrieved to when final encoding of all data items were complete.  This was measured as a function of the number of threads used and the number of data items encoded per thread.  These results are shown in the figure below.
+
 ![Encoding Speed Heamap](https://github.com/bots000/Advanced_Computer_Systems_Shared/blob/daaa4bdfd9c6127a79a717deb1c202cbb93c4324/Project4/plots/encoding_heatmap.png)
 
 ## Single Data Item Search Speed Results
