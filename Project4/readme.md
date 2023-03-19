@@ -14,6 +14,8 @@ Once all data is encoded through the process detailed above, the raw data/encode
 # Experimental Results
 ## Encoding Speed Results
 
+![Encoding Speed Heamap](https://github.com/bots000/Advanced_Computer_Systems_Shared/blob/daaa4bdfd9c6127a79a717deb1c202cbb93c4324/Project4/plots/encoding_heatmap.png)
+
 ## Single Data Item Search Speed Results
 
 ## Prefix Scan Speed Results
