@@ -44,7 +44,7 @@ vector<size_t> findIndices(size_t* array, size_t query_value, int length){
     int excess_pieces = excess_blocks % 4;
 
     compareVec = _mm256_set1_epi64x(query_value);
-    cout << compareVec[0] << endl;
+    //cout << compareVec[0] << endl;
     for(int compare_blocks = 0; compare_blocks <= full_blocks; compare_blocks++){
         //load 8 blocks of 4
         if((compare_blocks < full_blocks)){
@@ -85,7 +85,7 @@ vector<size_t> findIndices(size_t* array, size_t query_value, int length){
             while(mask_as_int != 0){
                 index_offset = _tzcnt_u32(mask_as_int);// for 0010, tzcnt = 1, for tzcnt
                 indices.push_back(compare_blocks*32 + i*4 + index_offset);
-                cout << "found 1 at " << indices[index_counter] << endl;
+                //cout << "found 1 at " << indices[index_counter] << endl;
                 index_counter++;
                 mask_as_int &= ~(1 << index_offset); //set the index as 0 to get next if in there
             }
@@ -95,6 +95,27 @@ vector<size_t> findIndices(size_t* array, size_t query_value, int length){
     //_mm256_load_si256 (__m256i const * mem_addr) for load
     //__m256i _mm256_cmpeq_epi64 (__m256i a, __m256i b) for compare
     return indices;
+}
+
+string getEndpoint(string start){
+    int len = start.length();
+    string end;
+    char curChar;
+    char newChar;
+    int i;
+    for(i = len -1; i >= 0; i-1){
+        curChar = start[i];
+        if(curChar != 'z'){
+            newChar = (char)(((int)curChar) + 1);
+            //cout << "was " << curChar << " now " << newChar << endl;
+            break;
+        }
+    }
+    end = start;
+    end.erase(i,len-i);
+    end.push_back(newChar);
+    //cout << start << " | " << end << endl;
+    return end;
 }
 
 // the following two structs are used to pass values to/from the thread worker function
@@ -168,12 +189,13 @@ int main(int argc, char *argv[]) {
     ifstream txt (input_file);
 
     //int num_lines = count(file_contents.str().begin(), file_contents.str().end(), '\n');
+    cout << "Getting size" << endl;
     int num_lines = 0;
     string line;
     while (txt >> line) {
         num_lines++;
     }
-    
+    cout << "Begin Encoding" << endl;
     size_t* encoded_array = (size_t*) aligned_alloc(32,sizeof(size_t)*num_lines);
     int end_num = num_lines + num_threads;
 
@@ -268,6 +290,121 @@ int main(int argc, char *argv[]) {
 
     cout << "Elapsed(s)=" << ((double) since(start).count())/1000 << endl;
     os.close();
+
+    cout << "Begin Query Testing" << endl;
+    ofstream outfile1 ("SIMDTest.csv",ofstream::binary);
+    int num_characters;
+    char* buffer = new char[150];
+    num_characters = sprintf(buffer, "Item,Index Matches,Time\n");
+    outfile1.write(buffer,num_characters);
+    double total_time;
+    //test searching for the first 500 values in the encoded array
+    for(int test_item = 0; test_item < 500; test_item++){
+        auto start1 = chrono::steady_clock::now();
+        vector<size_t> matches = findIndices(encoded_array, encoded_array[test_item],num_lines);
+        int num_matches = matches.size();
+        total_time = ((double) since(start1).count())/1000;
+        num_characters = sprintf(buffer, "%d,%d,%f\n",test_item,num_matches,total_time);
+        outfile1.write (buffer,num_characters);
+    }
+    outfile1.close();
+
+
+    cout << "Begin Prefix Testing" << endl;
+    ofstream outfile2 ("PrefixTest.csv",ofstream::binary);
+    num_characters;
+    num_characters = sprintf(buffer, "Item,Key Matches,Index Matches,Prefix Search Time,Encode Search Time,Total Time\n");
+    outfile2.write(buffer,num_characters);
+    
+    string match_item[10] = {"byas","woci","cide","ooihn","pikgy","synk","jahk","vuk","jja","ter"};
+
+    double prefix_time;
+    double encode_search_time;
+    
+    
+    for(int j = 0; j < 10; j++){
+        auto start1 = chrono::steady_clock::now();
+        auto start3 = chrono::steady_clock::now();
+        size_t matches[1000];
+        int pre_matches = 0;
+        int enc_matches = 0;
+
+        cout << "Searching for prefix: " << match_item[j] << endl;
+        string endstr = getEndpoint(match_item[j]);
+        //cout << "tp1" << endl;
+        pre_matches = bpt.simpleRange(match_item[j],endstr, matches);
+
+        prefix_time = ((double) since(start1).count())/1000;
+        //cout << "tp3" << endl;
+        cout << pre_matches << endl;
+        
+        auto start2 = chrono::steady_clock::now();
+        for(int i = 0; i < pre_matches; i++){   
+            //Node<string>* element = bpt.BPlusTreeSearch(bpt.getroot(), matches[i]);
+            //int index_of_node = bpt.find_index(element->item, matches[i], num_lines);
+            //cout << "This corresponds to " << element->item[index_of_node] << endl;
+            //cout << "p1" << endl;
+            //cout << "tp4" << endl;
+            vector<size_t> i_matches = findIndices(encoded_array, matches[i], num_lines);
+            //cout << "tp5" << endl;
+            enc_matches = enc_matches + i_matches.size();
+        }
+        encode_search_time = ((double) since(start2).count())/1000;
+        total_time = ((double) since(start3).count())/1000;
+        num_characters = sprintf(buffer, "%d,%d,%d,%f,%f,%f\n",j,pre_matches,enc_matches,prefix_time,encode_search_time,total_time);
+        
+        //cout << buffer << endl;
+        outfile2.write (buffer,num_characters);
+    }
+    outfile2.close();
+
+    cout << "Begin Naive Search Testing" << endl;
+    
+    ifstream txt3 (input_file);
+    num_lines = 0;
+    line;
+    string compare_line = "kszvdc";
+    
+    vector<int> matches;
+    auto start4 = chrono::steady_clock::now();
+    while (txt3 >> line) {
+        if(line == compare_line){
+            matches.push_back(num_lines);
+        }
+        num_lines++;
+    }
+    cout << "Found " << matches.size() << " items in " << ((double) since(start4).count())/1000 << " seconds" <<endl;
+
+
+    cout << "Begin Naive Prefix Testing" << endl;
+    cout << "Testing prefix byas" << endl;
+    
+    ifstream txt4 (input_file);
+    num_lines = 0;
+    string start_str = match_item[0];
+    string end_str = getEndpoint(start_str);
+    auto start5 = chrono::steady_clock::now();
+    while (txt4 >> line) {
+        if((line >= start_str)&&(line <= end_str)){
+            matches.push_back(num_lines);
+        }
+        num_lines++;
+    }
+    cout << "Found " << matches.size() << " items in " << ((double) since(start5).count())/1000 << " seconds" <<endl;
+
+    cout << "Testing prefix vuk" << endl;
+    ifstream txt5 (input_file);
+    num_lines = 0;
+    start_str = match_item[7];
+    end_str = getEndpoint(start_str);
+    auto start6 = chrono::steady_clock::now();
+    while (txt5 >> line) {
+        if((line >= start_str)&&(line <= end_str)){
+            matches.push_back(num_lines);
+        }
+        num_lines++;
+    }
+    cout << "Found " << matches.size() << " items in " << ((double) since(start6).count())/1000 << " seconds" <<endl;
 
     // now we need to write the encoded dictionary and encoded values to a file
     bpt.bpt_write(output_file);
