@@ -111,7 +111,7 @@ public:
             return cursor;
         }
     }
-    int range_search(T start, T end, T* result_data, int arr_length) {
+    int range_search(T start, T end, T result_data[], int arr_length) {
         int index=0;
 
         Node<T>* start_node = BPlusTreeRangeSearch(this->root,start);
@@ -122,7 +122,7 @@ public:
             if(cursor == nullptr){
                 break;
             }
-            for(int i=0; i< cursor->size;i++){
+            for(int i=0; i <cursor->size;i++){
                 temp = cursor->item[i];
                 if((temp >= start)&&(temp <= end)){
                     result_data[index] = temp;
@@ -144,6 +144,20 @@ public:
                 index=i;
                 break;
             }
+            if(data < arr[i]){
+                index = i;
+                break;
+            }
+            if(i==len-1){
+                index = len;
+                break;
+            }
+        }
+        return index;
+    }
+    int find_index_search(T* arr, T data, int len){
+        int index = 0;
+        for(int i=0; i<len; i++){
             if(data < arr[i]){
                 index = i;
                 break;
@@ -252,7 +266,7 @@ public:
                 child_copy[i] = cursor->children[i];
             }
             child_copy[cursor->size+1] = nullptr;
-            child_copy = child_insert(child_copy,child,cursor->size+1,find_index(item_copy,data,cursor->size+1));
+            child_copy = child_insert(child_copy,child,cursor->size+1,find_index_search(item_copy,data,cursor->size+1));
 
             //split nodes
             cursor->size = (this->degree)/2;
