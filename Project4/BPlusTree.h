@@ -133,6 +133,81 @@ public:
         }
         return index;
     }
+
+    int simpleRange(T start, T end, size_t result_data[]) {
+        int index=0;
+        //Node<T>* cursor = lowestParent(this->root, start, end);
+        index = recRange(getroot(), start, end, result_data, index);
+        //std::cout << index << std::endl;
+        return index;
+    }
+
+    Node<T>* lowestParent(Node<T>* cursor, T start, T end){
+        //Split tree as much as possible
+        if(leftmostItem(cursor->children[1]) >= end ){
+            //if the leftmost item of child[1] is above end, go deeper left
+            return lowestParent(cursor->children[0], start, end);
+        }
+        else if(leftmostItem(cursor->children[cursor->degree-1]) <= start ){
+            //if the rightmost node's leftmost item is lower than start, go deeper right
+            return lowestParent(cursor->children[cursor->degree-1], start, end);
+        }
+        else{
+            return cursor;
+        }
+
+    }
+
+    T leftmostItem(Node<T>* cursor){
+        if (cursor != NULL) {
+            //std::cout << "called" << std::endl;
+            if (cursor->is_leaf){
+                T temp = cursor->item[0];
+                //std::cout << "Item found: " << temp << std::endl;
+                return cursor->item[0];
+            }
+            if (!cursor->is_leaf) {
+                //std::cout << "going deeper" << std::endl;
+                return leftmostItem(cursor->children[0]);
+            }
+        }
+        return "";
+    }
+
+    int recRange(Node<T>* cursor, T start, T end, size_t result_data[], int index){
+        T temp;
+        if (cursor != NULL) {
+            //std::cout << "not null" << std::endl;
+            if (cursor->is_leaf){
+                //std::cout << "is leaf" << std::endl;
+                for (int i = 0; i < cursor->size; ++i) {
+                    temp = cursor->item[i];
+                    //std::cout << temp << std::endl;
+                    if((temp >= start)&&(temp <= end)){
+                        //std::cout << temp << std::endl;
+                        result_data[index] = cursor->encode[i];
+                        index++;
+                    }
+                }
+            }
+            //std::cout << "\n";
+
+            if (!cursor->is_leaf) {
+                //std::cout << "going deeper" << std::endl;
+                if(leftmostItem(cursor->children[0]) < end){ //only need to go deeper if the node's leftmost item in range
+                    for (int i = 0; i < cursor->size + 1; ++i) {
+                        //std::cout << "B1" << std::endl;
+                        if(leftmostItem(cursor->children[i]) < end){//again check if necessary
+                            //std::cout << "B2" << std::endl;
+                            index = recRange(cursor->children[i], start, end, result_data, index);
+                        }
+                    }
+                }
+            }
+        }
+        return index;
+    }
+
     bool search(T data) {  // Return true if the item exists. Return false if it does not.
         return BPlusTreeSearch(this->root, data) != nullptr;
     }
