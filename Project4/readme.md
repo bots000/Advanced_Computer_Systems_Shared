@@ -73,5 +73,5 @@ The results from the prefix search highlight several important aspects of our im
 
 # Conclusion
 
-
+Overall, our implementation has several strengths. For encoding, our method has two key advantages: First, it allows for many threads to execute without coherence issues, allowing for a simpler execution per thread. Second, due to the lack of coherence issues, the encoded array can be constructed on the same passthrough that creates the encoding dictionary. For our SIMD search, the single item query is able to rapidly read through the encoded array, allowing for rapid item lookup. If we were to revisit this project for a version 2, there are two key areas we would revise. First, we would look to make some key optimizations to the b tree to aid in prefix querying. Second, we would write a new SIMD search function optimized for several queries at once.
 
