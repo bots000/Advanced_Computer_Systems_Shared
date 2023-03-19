@@ -24,6 +24,10 @@ Once all data is encoded through the process detailed above, the raw data/encode
 # Analysis
 ## Encoding Speed Analysis
 
+Viewing the encoding speed heatmap, the encoding runtime can be viewed as a function of the number of threads used and the number of data items encoded per thread.   Excluding outliers, a general pattern can be observed.  As the number of threads and the number of data items encoded per thread increases, the overall runtime decreases.  Each of these are consistent with expectations.  From Project 1 in this course, it was shown that increasing thread count, to a point, will increase efficiency.  This is also seen in this project's results.  The optimal number of threads seems to be between around 125.  Up until this point, the runtime decreaes with more threads.  Beyond this point, more threads seems to hurt the code's efficiency.  This is due to the fact that the generation/handling of the threads becomes the cause of the latency, rather than the running of the thread function.  As previously mentioned, the runtime also, gnerally, decreased as the number of data items encoded per thread increased.  Similar to the trend seen in the number of threads used, too many data items processed per thread resulted in impaired performance.
+
+It became clear that there is a trade-off between these two variables; optimal performance comes when a thread's results are gathered exactly as it finishes running its thread function.  It is of course difficult to determine this exaclty (without an exhaustive number of runs), but it can be observed that this optimal point occurs around 125 threads and 800 data items per thread.
+
 ## Single Data Item Search Speed Results
 
 ## Prefix Scan Speed Results
