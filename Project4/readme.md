@@ -44,11 +44,23 @@ Time was measured between the time when the first raw data item is retrieved to 
 
 ## Single Data Item Search Speed Results
 
+### Naive
+
+For the naive implementation of searching for a given column, the string "kszvdc" was searched for. A vector of type size_t was initialized for indices to simplify complexity and bring some parity between the the naive and SIMD implementations. Beyond that, the workflow was to load one line at a time and compare it for equality with the search string. In two trials of testing, the naive search took 11.6 and 12.9 seconds. 
+
+### Our Implementation
+
 In order to test the efficiency of the SIMD search implementation, several items were chosen at random from Column.txt. Only the time to find all indices given the hash was tested. Shown below are the results from the test.
 
 ![SIMD Single Query Results](https://raw.githubusercontent.com/bots000/Advanced_Computer_Systems_Shared/main/Project4/plots/SIMD_MatchVsTime.png)
 
 ## Prefix Scan Speed Results
+
+### Naive
+
+For the naive testing two different prefixes were tested. The prefix "byas" was chosen because it only appears 885 times, while the prefix "vuk" was chosen because it appears 11797 times. For "byas", search time was 12.9 seconds. For "vuk", search time was 12.188 seconds.
+
+### Our Implementation
 
 Because the prefix search consists of two distinct elements, fetching encodings and searching the array for indices, they are tested separately. To test different prefixes, items were taken from Column.txt and trimmed to 3-5 characters. Below are the results of 10 tests.
 
