@@ -1,5 +1,5 @@
 #include <iostream>
-#include "BPlusTree.h"
+#include "NewBPlusTree.h"
 #include <fstream>
 #include <string>
 #include <sstream>
@@ -28,7 +28,7 @@ auto since(chrono::time_point<clock_t, duration_t> const& start)
     return chrono::duration_cast<result_t>(clock_t::now() - start);
 }
 
-vector<size_t> findIndices(size_t* array, size_t query_value, int length){
+vector<size_t> findIndices(size_t* array, size_t* query_values, int length, int num_queries){
     __m256i vectorArr[8];
     __m256i mask;
     __m256i compareVec;
@@ -42,8 +42,6 @@ vector<size_t> findIndices(size_t* array, size_t query_value, int length){
     int excess_blocks = length % 32;
     int full_vectors = excess_blocks / 4;
     int excess_pieces = excess_blocks % 4;
-
-    compareVec = _mm256_set1_epi64x(query_value);
     //cout << compareVec[0] << endl;
     for(int compare_blocks = 0; compare_blocks <= full_blocks; compare_blocks++){
         //load 8 blocks of 4
@@ -79,17 +77,19 @@ vector<size_t> findIndices(size_t* array, size_t query_value, int length){
                 endval ++;
             }
         }
-        for(int i = 0; i < endval; i++){
-            mask = _mm256_cmpeq_epi64(vectorArr[i], compareVec);
-            mask_as_int = _mm256_movemask_pd(_mm256_castsi256_pd(mask)); //mask as int -> 0x28 [1/0 for val 3] [1/0 for val 2] [1/0 for val 1] [1/0 for val 0]
-            while(mask_as_int != 0){
-                index_offset = _tzcnt_u32(mask_as_int);// for 0010, tzcnt = 1, for tzcnt
-                indices.push_back(compare_blocks*32 + i*4 + index_offset);
-                //cout << "found 1 at " << indices[index_counter] << endl;
-                index_counter++;
-                mask_as_int &= ~(1 << index_offset); //set the index as 0 to get next if in there
+        for (int k = 0; k < num_queries; k++){
+            compareVec = _mm256_set1_epi64x(query_values[k]);
+            for(int i = 0; i < endval; i++){
+                mask = _mm256_cmpeq_epi64(vectorArr[i], compareVec);
+                mask_as_int = _mm256_movemask_pd(_mm256_castsi256_pd(mask)); //mask as int -> 0x28 [1/0 for val 3] [1/0 for val 2] [1/0 for val 1] [1/0 for val 0]
+                while(mask_as_int != 0){
+                    index_offset = _tzcnt_u32(mask_as_int);// for 0010, tzcnt = 1, for tzcnt
+                    indices.push_back(compare_blocks*32 + i*4 + index_offset);
+                    //cout << "found 1 at " << indices[index_counter] << endl;
+                    index_counter++;
+                    mask_as_int &= ~(1 << index_offset); //set the index as 0 to get next if in there
+                }
             }
-
         }
     }
     //_mm256_load_si256 (__m256i const * mem_addr) for load
@@ -233,10 +233,10 @@ int main(int argc, char *argv[]) {
         // we will either read the number of lines specified, or the rest of the function
         int num_read = min(per_thread, num_lines-counter);
 
-    	// get the index of the array for this line
-    	index = (count) % num_threads;
+        // get the index of the array for this line
+        index = (count) % num_threads;
 
-    	if (count >= num_threads){//unpack threads
+        if (count >= num_threads){//unpack threads
             
             ret = pthread_join(thread_array[index], (void**)&dummyPack);
             map<string, size_t> temp_dict = ((struct outPack*)dummyPack)->temp_dict;
@@ -284,9 +284,9 @@ int main(int argc, char *argv[]) {
 
     // Go through and construct the B tree from the data
     map<string, size_t>::iterator i;
-	for (i=master_dict.begin(); i!=master_dict.end(); ++i){
-		bpt.insert((*i).first, (*i).second);
-	}
+    for (i=master_dict.begin(); i!=master_dict.end(); ++i){
+        bpt.insert((*i).first, (*i).second);
+    }
 
     cout << "Elapsed(s)=" << ((double) since(start).count())/1000 << endl;
     os.close();
@@ -301,7 +301,8 @@ int main(int argc, char *argv[]) {
     //test searching for the first 500 values in the encoded array
     for(int test_item = 0; test_item < 500; test_item++){
         auto start1 = chrono::steady_clock::now();
-        vector<size_t> matches = findIndices(encoded_array, encoded_array[test_item],num_lines);
+        size_t test_item_arr[1] = {encoded_array[test_item]};
+        vector<size_t> matches = findIndices(encoded_array, test_item_arr,num_lines, 1);
         int num_matches = matches.size();
         total_time = ((double) since(start1).count())/1000;
         num_characters = sprintf(buffer, "%d,%d,%f\n",test_item,num_matches,total_time);
@@ -331,6 +332,7 @@ int main(int argc, char *argv[]) {
 
         cout << "Searching for prefix: " << match_item[j] << endl;
         string endstr = getEndpoint(match_item[j]);
+        cout << endstr << endl;
         //cout << "tp1" << endl;
         pre_matches = bpt.simpleRange(match_item[j],endstr, matches);
 
@@ -339,16 +341,7 @@ int main(int argc, char *argv[]) {
         cout << pre_matches << endl;
         
         auto start2 = chrono::steady_clock::now();
-        for(int i = 0; i < pre_matches; i++){   
-            //Node<string>* element = bpt.BPlusTreeSearch(bpt.getroot(), matches[i]);
-            //int index_of_node = bpt.find_index(element->item, matches[i], num_lines);
-            //cout << "This corresponds to " << element->item[index_of_node] << endl;
-            //cout << "p1" << endl;
-            //cout << "tp4" << endl;
-            vector<size_t> i_matches = findIndices(encoded_array, matches[i], num_lines);
-            //cout << "tp5" << endl;
-            enc_matches = enc_matches + i_matches.size();
-        }
+        enc_matches += findIndices(encoded_array, matches, num_lines, pre_matches).size();
         encode_search_time = ((double) since(start2).count())/1000;
         total_time = ((double) since(start3).count())/1000;
         num_characters = sprintf(buffer, "%d,%d,%d,%f,%f,%f\n",j,pre_matches,enc_matches,prefix_time,encode_search_time,total_time);
