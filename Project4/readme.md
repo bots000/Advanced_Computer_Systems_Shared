@@ -36,6 +36,21 @@ The SIMD search is programmed to only use 8 compare registers and 1 query value 
 For the SIMD search and prefix tests, 4 csv files are created by default containing the results. 
 
 # Experimental Results
+
+It is important to note that the following results were obtained on a machine with the following hardware characteristics.
+
+| Property | Value |
+| --- | --- |
+| CPU Model | 11th Gen Intel(R) Core(TM) i7-1195G7 CPU @ 2.90GHz |
+| # Cores | 4 |
+| # Threads | 8 |
+| Max Turbo Frequency | 5 GHz |
+| Base Frequency | 2.92 GHz |
+| Cache L1 | 320K |
+| Cache L2 | 5 MB |
+| Cache L3 | 12 MB |
+|Ram | 32 GB DDR4 2666 Hz |
+
 ## Encoding Speed Results
 
 Time was measured between the time when the first raw data item is retrieved to when final encoding of all data items were complete.  This was measured as a function of the number of threads used and the number of data items encoded per thread.  These results are shown in the figure below.
