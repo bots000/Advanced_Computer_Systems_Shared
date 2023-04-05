@@ -1,0 +1,1 @@
+This is just the dumb version --- it includes going through it once to cast it to grey, determining the threshold value, and going through it again to segment (the chosen image isn't good for segmenting, but it shows the purpose.  I am working on getting better images now).
