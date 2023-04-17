@@ -1,8 +1,21 @@
 #include <immintrin.h>
 #include <iostream>
+#include <pthread.h>
 
 
-__m256 loadStrided(char* Dstart, int stride, int pixels){
+struct datPack{    
+    char* d_in;
+    char* wb;
+};
+
+void* wb_thread(void* dpack){
+    datPack* d_loc = (datPack*) dpack;
+    (*d_loc).wb[0] = (*d_loc).d_in[0];
+    return nullptr;
+    //pthread_exit();
+}
+
+__m256i loadStrided(char* Dstart, int stride, int pixels){
     //char items[32];
     char* items = (char*) aligned_alloc(32,32*sizeof(char));
     for(int i =0; i<32; i++){
@@ -15,8 +28,34 @@ __m256 loadStrided(char* Dstart, int stride, int pixels){
     return _mm256_load_si256((__m256i*) items);
 }
 
-void storeStrided(char* Dstart, int stride, int pixels){
-    
+void storeStridedST(char* Dstart, __m256i vec, int stride, int pixels){
+    char* tdataIn = (char*) aligned_alloc(32,32*sizeof(char));
+    _mm256_store_si256((__m256i*) tdataIn, vec);
+    for(int i = 0; i < pixels; i++){
+        Dstart[i*stride] = tdataIn[i];
+    }
+    return;
+
+}
+void storeStridedMT(char* Dstart, __m256i vec, int stride, int pixels){
+    char* tdataIn = (char*) aligned_alloc(32,32*sizeof(char));
+    _mm256_store_si256((__m256i*) tdataIn, vec);
+    pthread_t thread_array[16];
+    datPack datArr[16];
+    for(int i = 0; i < pixels*2; i++){
+        if(i<pixels){
+            datPack tempPack;
+            tempPack.d_in = tdataIn+i;
+            tempPack.wb = Dstart+i*stride;
+
+            pthread_t temp_thread;
+            pthread_create(&temp_thread, NULL, wb_thread, (void*) &tempPack);
+            thread_array[i%pixels] = temp_thread;
+        }else{
+            pthread_join(thread_array[i%pixels], NULL);
+        }
+    }
+    return;
 }
 
 
@@ -40,7 +79,7 @@ void maskHiLo(char* dataIn, char* dataOut, char t_lo, char t_hi, int stride, int
     for(int i = 0; i*32 < pixels; i++){
         //Load [based on stride] several vectors
         memOffset = i*32*stride;
-        cur_vec = loadStrided()
+        cur_vec = loadStrided(dataIn+memOffset,stride,pixels);
         //Compare and make mask for each loaded
         isUnderHi = _mm256_cmpgt_epi8(c_hi,cur_vec);
         printf("%X\n",_mm256_movemask_epi8(isUnderHi));
@@ -51,7 +90,8 @@ void maskHiLo(char* dataIn, char* dataOut, char t_lo, char t_hi, int stride, int
         //Mask the vector so everything in range remains
         cur_vec = _mm256_and_si256(cur_vec, inRange);
         //Store entire vector to the specific memory location
-        _mm256_store_si256((__m256i*) dataOut + memOffset, cur_vec);
+        //_mm256_store_si256((__m256i*) dataOut + memOffset, cur_vec);
+        storeStridedST(dataOut+memOffset, cur_vec, stride, pixels);
 
     }
     
@@ -117,7 +157,7 @@ int main(){
     for(int i = 0; i< 32; i++){
         tdataIn[i] = i;
     }
-    maskHiLoGscale(tdataIn,tdataOut,4,10,32);
+    maskHiLo(tdataIn,tdataOut,4,10,1,32);
     std::cout << tdataOut[6] << std::endl;
     return 0;
 }
