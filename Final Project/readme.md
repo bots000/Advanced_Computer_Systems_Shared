@@ -5,9 +5,9 @@ Work Completed:
 - simd greyscale threshold determination compatability
 
 Comparing running simple vs simd for all 300 ish test images at one time (simd only for converting to greyscale, time only recorded for the actual conversion):
-Simple took 4 minutes and 15 seconds
-Simd took 13.687 seconds
-Simple took 16.586 seconds
+- Simd took 13.687 seconds
+- RGB version took 15.099 seconds
+- Simple took 16.586 seconds
 
 Work to be completed:
 
