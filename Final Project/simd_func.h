@@ -110,6 +110,84 @@ void maskHiLo(unsigned char* dataIn, unsigned char* dataOut, char t_lo, char t_h
     }
 }
 
+void maskHiLoRGB(unsigned char* dataIn, unsigned char* dataOut, char r_lo, char r_hi, char g_lo, char g_hi, char b_lo, char b_hi, int pixels){
+    //Process:
+    //Create hi and lo comparison vectors
+    int stride = 3;
+    __m256i c_lo;
+    __m256i c_hi;
+    
+
+    //BEGIN LOOP
+    //int vecPerLoop = 4;
+    __m256i R;
+    __m256i G;
+    __m256i B;
+    __m256i isUnderHi;
+    __m256i isAboveLo;
+    __m256i inRange;
+
+    long memOffset;
+
+    int cur_pixels = 32;
+    printf("Pixels: %d\n",pixels);
+
+    for(int i = 0; i*32 < pixels; i++){
+        printf("Cur pixel: %d\r",i);
+        if(pixels - i*32 < 32){
+            cur_pixels = pixels - i*32 < 32;
+        }
+
+        //Load [based on stride] several vectors
+        memOffset = i*32*stride;
+        R = loadStrided(dataIn+memOffset,stride,cur_pixels);
+        G = loadStrided(dataIn+memOffset+1,stride,cur_pixels);
+        B = loadStrided(dataIn+memOffset+2,stride,cur_pixels);
+
+        //////////Compare R Threshold//////////////////
+        c_lo = _mm256_set1_epi8(r_lo);
+        c_hi = _mm256_set1_epi8(r_hi);
+        //Compare and make mask for each loaded
+        isUnderHi = _mm256_cmpeq_epi8( c_hi, _mm256_max_epu8(c_hi,R));
+        isAboveLo = _mm256_cmpeq_epi8(R, _mm256_max_epu8(R,c_lo));
+        inRange = _mm256_and_si256(isUnderHi, isAboveLo); //Initial val of inRange, set not modified
+        ///////////////////////////////////////////////
+
+        //////////Compare G Threshold//////////////////
+        c_lo = _mm256_set1_epi8(g_lo);
+        c_hi = _mm256_set1_epi8(g_hi);
+        //Compare and make mask for each loaded
+        isUnderHi = _mm256_cmpeq_epi8( c_hi, _mm256_max_epu8(c_hi,G));
+        isAboveLo = _mm256_cmpeq_epi8(G, _mm256_max_epu8(G,c_lo));
+        inRange = _mm256_and_si256(inRange, isAboveLo); //modify running mask
+        inRange = _mm256_and_si256(isUnderHi, inRange); //modify running mask
+        ///////////////////////////////////////////////
+
+        //////////Compare B Threshold//////////////////
+        c_lo = _mm256_set1_epi8(b_lo);
+        c_hi = _mm256_set1_epi8(b_hi);
+        //Compare and make mask for each loaded
+        isUnderHi = _mm256_cmpeq_epi8( c_hi, _mm256_max_epu8(c_hi,B));
+        isAboveLo = _mm256_cmpeq_epi8(B, _mm256_max_epu8(B,c_lo));
+        inRange = _mm256_and_si256(inRange, isAboveLo); //modify running mask
+        inRange = _mm256_and_si256(isUnderHi, inRange); //modify running mask
+        ///////////////////////////////////////////////
+
+        //Mask the vectors so everything in range remains
+        R = _mm256_and_si256(R, inRange);
+        G = _mm256_and_si256(G, inRange);
+        B = _mm256_and_si256(B, inRange);
+        
+
+        //Store entire vector to the specific memory location
+        storeStridedST(dataOut+memOffset, R, stride, cur_pixels);
+        storeStridedST(dataOut+memOffset+1, G, stride, cur_pixels);
+        storeStridedST(dataOut+memOffset+2, B, stride, cur_pixels);
+
+    }
+}
+
+
 void maskHiLoGscale(unsigned char* dataIn, unsigned char* dataOut, char t_lo, char t_hi, int length){
     //VecReg Usage:
     //16 available
