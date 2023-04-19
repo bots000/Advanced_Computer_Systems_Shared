@@ -24,7 +24,7 @@ int main() {
     int width, height, bpp;
 
     unsigned char* rgb_image = stbi_load("images/106.png", &width, &height, &bpp, 3);
-    unsigned char* filt_img = (unsigned char*) aligned_alloc(3*width * height,3*width * height*sizeof(unsigned char));
+    unsigned char* filt_img = (unsigned char*) aligned_alloc(32,3*width * height*sizeof(unsigned char));
 
     int red_counts[256] = {0};
     int green_counts[256] = {0};
@@ -44,10 +44,14 @@ int main() {
 
     cout << red_threshold << ' ' << blue_threshold << ' ' << green_threshold << ' ' << endl;
 
-    maskHiLoRGB(rgb_image, filt_img, 0, red_threshold, 0 , blue_threshold, 0, green_threshold, width*height);
-    
+    red_threshold = 200;
+    blue_threshold = 200;
+    green_threshold = 200;
 
-    stbi_write_png("try_filter_greyscale2.png", width, height, 3, filt_img, height*width*3);
+    maskHiLoRGB(rgb_image, filt_img, 0, red_threshold, 0 , blue_threshold, 0, green_threshold, width*height);
+    cout << "finished masking" << endl;
+
+    stbi_write_png("try_filter_greyscale2.png", width, height, 1, filt_img, width);
 
 
     return 0;
