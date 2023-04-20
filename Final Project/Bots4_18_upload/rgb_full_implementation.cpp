@@ -22,7 +22,7 @@ using namespace std;
 int main() {
     
     int width, height, bpp;
-    string path = "/mnt/c/Users/Kyle/Documents/School Folder/Advanced Computer Systems/Final Project/stb/images";
+    string path = "/mnt/c/Users/gagnog/Documents/GitHub/Advanced_Computer_Systems_Shared/Final Project/train/x/";
     int path_len = path.length() + 1;
     int total_initial_duration = 0;
     int total_threshold_duration = 0;
@@ -61,8 +61,10 @@ int main() {
         total_threshold_duration += (int) duration_threshold_run.count();
 
         auto start_second_run = high_resolution_clock::now();
+        cout << "ImageStart" << endl;
+        maskHiLoRGB2(rgb_image, filt_img, 0, red_threshold, 0 , blue_threshold, 0, green_threshold, width*height);
+        cout << "ImageEnd" << endl;
 
-        maskHiLoRGB(rgb_image, filt_img, 0, red_threshold, 0 , blue_threshold, 0, green_threshold, width*height);
 
 
     
@@ -74,7 +76,7 @@ int main() {
         string image_path2(image_path);
         string img = image_path2.substr(path_len, image_path2.length()-path_len);
 
-        char seg[]  = "/mnt/c/Users/Kyle/Documents/School Folder/Advanced Computer Systems/Final Project/stb/segmented_colored/";
+        char seg[]  = "/mnt/c/Users/gagnog/Documents/GitHub/Advanced_Computer_Systems_Shared/Final Project/segmented_colored/";
         const char* new_filename = strcat(seg, img.c_str());
 
         stbi_write_png(new_filename, width, height, 3, filt_img, width*3);

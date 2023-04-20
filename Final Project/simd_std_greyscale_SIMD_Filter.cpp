@@ -150,10 +150,12 @@ int main() {
 
     cout << "Time of initial run (us): " << duration_initial_run.count() << endl;
 
-    maskHiLoRGB(rgb_image, filt_img, 128, 255, 0 , 100, 128, 255, width*height);
+    cout << width << ' ' << height << endl;
+
+    maskHiLoRGB2(rgb_image, filt_img, 100, 255, 0 , 100, 100, 255, width*height);
     
 
-    stbi_write_png("try_filter_greyscale2.png", width, height, 3, filt_img, width*3);
+    stbi_write_png("try_filter_greyscale5.png", width, height, 3, filt_img, width*3);
 
 
     return 0;
