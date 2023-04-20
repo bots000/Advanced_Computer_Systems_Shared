@@ -33,7 +33,7 @@ int main() {
 
         
 
-        int grey_counts[256];
+        int grey_counts[256] = {0};
         int r;
         int g;
         int b;
@@ -54,9 +54,6 @@ int main() {
                     cout << width << endl;
                 }
                 gray_img[x * width + y] = (unsigned char) g;
-                if (g > 254){
-                    cout << g << endl;
-                }
                 grey_counts[g]++;
                 
             }
@@ -69,7 +66,7 @@ int main() {
         auto start_threshold_run = high_resolution_clock::now();
         int threshold;
         int max = distance(begin(grey_counts), max_element(begin(grey_counts), end(grey_counts)));
-        threshold = (255-max)*1.2;
+        threshold = max*.7;
 
         auto stop_threshold_run = high_resolution_clock::now();
         auto duration_threshold_run = duration_cast<microseconds>(stop_threshold_run - start_threshold_run);
@@ -77,13 +74,13 @@ int main() {
 
 
         auto start_second_run = high_resolution_clock::now();
-        for(int x = 0; x < width; x++){
-            for(int y = 0; y < height; y++){
-                if (int(gray_img[y*width+x]) < threshold and int(gray_img[y*width+x])>- 0){
-                    gray_img[y*width+x] = (unsigned char) 255;
+        for(int x = 0; x < height; x++){
+            for(int y = 0; y < width; y++){
+                if (int(gray_img[x * width + y]) < threshold and int(gray_img[x * width + y])>= 0){
+                    gray_img[x * width + y] = (unsigned char) 255;
                 }
                 else{
-                    gray_img[y*width+x] = (unsigned char) 0;
+                    gray_img[x * width + y] = (unsigned char) 0;
                 }
                 
             }
