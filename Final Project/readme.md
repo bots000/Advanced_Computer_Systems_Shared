@@ -4,7 +4,7 @@ This project was a student-picked project, with the criteria of using either SIM
 
 Image segmentation is concerned with automatically obtaining information about an image by processing its contents by edges, shape, size, color, or some other means of comparison.  Doing so allows certain objects in the image to be singled out from the background.  This is commonly used in industry today, with applications including medical image analysis, satellite imaging, facial recognition, and autonmous vehicles.  This project focuses on the medical aspect, and uses a data set comprised of CT scans of multiple myeloma cells.  The data set was obtained from an IEEE grand challenge, and is available to be viewed online.  A sample image from the data set is shown below.
 
-![Example Data Set Image](https://user-images.githubusercontent.com/89858703/233716971-34f0444b-f366-4014-a7f0-c3f2b70985a8.png = 500x500)
+![Example Data Set Image](https://user-images.githubusercontent.com/89858703/233716971-34f0444b-f366-4014-a7f0-c3f2b70985a8.png = 250x250)
 
 # Program Explanation
 
