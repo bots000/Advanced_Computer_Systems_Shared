@@ -15,7 +15,7 @@ There are many components involved in this project's codebase, including: image 
 
 # How to Use
 
-Before compiling and running, it is important to collect your dataset, and store the images to be segmented in /images/.  This is the directory that will be searched for image loading at the top of each main function.
+Before compiling and running, it is important to collect your dataset, and store the images to be segmented in /images/.  This is the directory that will be searched for image loading at the top of each main function.  It is also important to note that all final versions of codes are uploaded under /Bots4_18_upload/.  Files taken from the main repository are not promised to be up to date.
 
 It is important to note that to obtain the segmented images, you first need to create the directory within whcih they will be stored.  This includes creating /segmented/, /segmented_simple/, /segmented_colored/, and segmented_colored_simple/ directories (four output data sets).  Each directory is populated by running a different script, and each will use a different version of the segmentation.  To see what programs to compile and run to perform the different types of segmentation, see the table below.
 
@@ -64,10 +64,14 @@ How long each version of the segmentations implented took to both segment and ma
 
 # Analysis
 
+When looking through the produced segmented images, a few things can be observed.  Firstly, both the grayscale and the naive grayscale implementation produce very good results.  This is to be expected, as converting an image to grayscale for color thresholding is the standard way of doing it.  It can be seen that the SIMD processing produced slightly better results than the naive process - the naive process has some extra specs throughout the image that do not belong to a cell nucleus.  This is likely due to the fact that the math done to determine the gray pixels using SIMD instructions introduced rounding errors that caused the pixel values to be very slighly different than they would normally be.  These errors are reflected in flipped pixels when comparing the two images.
 
+For the RGB segmented images, it can be seen that there is a little bit more error that was introduced.  This was due to the fact that choosing a segmented threshold value was significantly tougher than for grayscale.  This due to one main reason: three thresholds had to be determined instead of one, and the process for integrating these thresholds is not well debugged.  As before mentioned, it is the standard to convert to grayscale for color thresholding.  We took on the RGB implementation to challenge the status quo; however, this meant that we did not have as much documentation on how the thresholding should be done.  It became clear that each color needed its own threshold equation (the same basic process had to be slightly altered for each), or else no pixels would show through (due to the sensitivity of the three colors being different).  Due to these troubles, slightly worse results were observed in the correctness of RGB segmentation.
 
+It was found in every case that the use of SIMD instructions sped up the grayscale conversion/pixel value counting process by up ro 40%.  This is consistent with expectations, as this is a trivial pixel-by-pixel process that was sped up with single instruction multiple data capabilities.  Minimal additionally steps had to be taken in order to incoorporate the SIMD instructions, which is the sign that performance can be expected to improve.
 
 # Conclusion
 
+In this project, we investigated the optimization of the color segmentation process with the use of SIMD instructions and by implementing other alternatives (RGB implementations).  While it was found that SIMD instructions can increase the efficiency of both main steps of color segmentation.  It was found that SIMD implementations for grayscale segmentation were significantly faster than the naive implementation, saving u pto 40% on grayscale conversion and 95% on the threshold masking.  Additionally, the grayscale segmentation gave very accurate results (better than the naive implementation).  However, the RGB implementation struggled in runtime performance due to the excess setting and shuffling of RGB values needed for the SIMD instructions to be used and in accuracy due to the lack of an established process for RGB thresholding.  This project concluded that SIMD does speed up runtime, and that grayscale conversion is indeed the best method for color segmentation.
 
 
