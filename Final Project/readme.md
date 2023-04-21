@@ -10,12 +10,22 @@ This project segments images such as this one using color thresholding.  Color t
 
 # Program Explanation
 
-
+There are many components involved in this project's codebase, including: image reading and writing, grayscale conversion and thresholding, RGB thresholding, SIMD masking for grayscale threshold comparison, and SIMD masking for RGB threshold comparison.  The final product will perform the naive implementation, grayscale implementation, naive RGB implementation, and advanced RGB implementation.  Performing each of these will result in a new subset of segmented images; it is important to note that both the naive RGB implementation and RGB implementation resulted in the same segmented images, just with a runtime difference, so one set of results is stored to represent both of them.
 
 
 # How to Run
 
+It is important to note that to obtain the segmented images, you first need to create the directory within whcih they will be stored.  This includes creating /segmented/, /segmented_simple/, /segmented_colored/, and segmented_colored_simple/ directories (four output data sets).  Each directory is populated by running a different script, and each will use a different version of the segmentation.  To see what programs to compile and run to perform the different types of segmentation, see the table below.
 
+| Segmentation Type | File to Run | Directory for Output Images |
+| --- | --- | --- |
+| Naive grayscale | simple_thresholding.cpp | /segmented_simple/ |
+| SIMD grayscale | full_grayscale_implementation.cpp | /segmented/ |
+| Naive RGB | simple_thresholding_rgb.cpp | /segmented_colored_simple/ |
+| Naive SIMD RGB |  | /segmented_colored/ |
+| Advanced SIMD RGB | rgb_full_implementation.cpp | /segmented_colored/ |
+
+It is important to note that the reading and writing is done using the stb package, which can be downloaded from the following github: https://github.com/nothings/stb.  The SIMD intrinsics header file also needs to be downloaded and included for this project.  The following line can be used to compile the code in this project: g++ -march=native -mavx correct_cpp_file_here.cpp -o outfile.  This compile can then be run using time ./outfile.
 
 # Experimental Results
 
